@@ -3,11 +3,13 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout, setUser } from "./pages/redux/userSlice.js";
 import { jwtDecode } from "jwt-decode";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+import ProtectedRoute from "./pages/ProtectedRoute.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import Login from "./pages/Login.jsx";
+import RedirectIfLoggedIn from "./pages/RedirectIfLoggedIn.jsx";
 import Register from "./pages/Register.jsx";
 import GenQuestion from "./pages/GenQuestion.jsx";
 import CreateExam from "./pages/CreateExam.jsx";
@@ -41,20 +43,84 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <main className={!hideLayout ? "" : "min-h-screen w-full"} >
+      <main className={!hideLayout ? "" : "min-h-screen w-full"}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/GenQuestion" element={<GenQuestion />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/CreateExam" element={<CreateExam/>}/>
-          <Route path="/settings" element={<Settings/>}/>
-          <Route path="/manual-questions" element={<ManualQuestions/>}/>
-          <Route path="/questions" element={<QuestionsBank/>}/>
-          <Route path="/exam-bank" element={<ExamBank/>}/>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/GenQuestion"
+            element={
+              <ProtectedRoute>
+                <GenQuestion />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <RedirectIfLoggedIn>
+                <Login />
+              </RedirectIfLoggedIn>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RedirectIfLoggedIn>
+                <Register />
+              </RedirectIfLoggedIn>
+            }
+          />
+          <Route
+            path="/CreateExam"
+            element={
+              <ProtectedRoute>
+                <CreateExam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manual-questions"
+            element={
+              <ProtectedRoute>
+                <ManualQuestions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/questions"
+            element={
+              <ProtectedRoute>
+                <QuestionsBank />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exam-bank"
+            element={
+              <ProtectedRoute>
+                <ExamBank />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
-      
+
       {/* Toast Container */}
       <ToastContainer
         position="top-right"

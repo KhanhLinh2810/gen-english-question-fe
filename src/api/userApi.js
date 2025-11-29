@@ -1,4 +1,5 @@
 import { apiCaller } from './apiCaller.js';
+import Cookies from 'js-cookie';
 
 // Get current user info
 export const getMe = async () => {
@@ -55,6 +56,8 @@ export const updateAvatar = async (avatarFile) => {
 export const deleteAccount = async () => {
   try {
     const response = await apiCaller.delete('/user');
+    if (response.status === 200)
+    Cookies.remove("access_token");
     return response.data;
   } catch (error) {
     console.error('Error deleting account:', error);
