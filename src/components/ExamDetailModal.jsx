@@ -66,6 +66,16 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
                     {exam.list_question?.reduce((total, q) => total + (q.score_in_exam || q.score || 0), 0) || 0} điểm
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Trạng thái:</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    exam.is_public !== false 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {exam.is_public !== false ? 'Công khai' : 'Riêng tư'}
+                  </span>
+                </div>
               </div>
             </div>
 

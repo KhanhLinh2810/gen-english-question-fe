@@ -13,10 +13,11 @@ const CreateExam = () => {
   const [examInfo, setExamInfo] = useState({
     title: '',
     description: '',
-    timeLimit: 60, // minutes
+    timeLimit: 30, // minutes - default 30
     startTime: '',
     endTime: '',
     maxAttempts: 1,
+    isPublic: true, // Default to public
     selectedQuestions: []
   });
 
@@ -47,16 +48,16 @@ const CreateExam = () => {
         setExamInfo({
           title: exam.title,
           description: exam.note || '',
-          timeLimit: exam.duration,
+          timeLimit: exam.duration || 30,
           startTime: exam.earliest_start_time ? new Date(exam.earliest_start_time).toISOString().slice(0, 16) : '',
           endTime: exam.lastest_start_time ? new Date(exam.lastest_start_time).toISOString().slice(0, 16) : '',
           maxAttempts: exam.max_attempt || 1,
+          isPublic: exam.is_public !== undefined ? exam.is_public : true,
           selectedQuestions: exam.list_question.map(q => ({
             id: q.id,
             score: q.score_in_exam || q.score
           }))
         });
-        toast.success('Tải thông tin đề thi thành công!');
       }
     } catch (error) {
       console.error('Error loading exam for edit:', error);
@@ -224,10 +225,11 @@ const CreateExam = () => {
       const examData = {
         title: examInfo.title.trim(),
         note: examInfo.description.trim() || '', // Note is required but can be empty
-        duration: parseInt(examInfo.timeLimit),
+        duration: examInfo.timeLimit ? parseInt(examInfo.timeLimit) : 30, // Default 30 if not provided
         earliest_start_time: new Date(examInfo.startTime).toISOString(),
         lastest_start_time: examInfo.endTime ? new Date(examInfo.endTime).toISOString() : null,
         max_attempt: examInfo.maxAttempts || null,
+        is_public: examInfo.isPublic === true || examInfo.isPublic === false ? examInfo.isPublic : true, // Explicitly handle true/false
         list_question: examInfo.selectedQuestions.map(q => ({
           question_id: parseInt(q.id),
           score: Math.round(q.score) // Convert to integer as required by validator
@@ -244,15 +246,19 @@ const CreateExam = () => {
       if (response.code === 'SUCCESS') {
         toast.success(isEditMode ? 'Cập nhật đề thi thành công!' : 'Tạo đề thi thành công!');
         
-        if (!isEditMode) {
+        if (isEditMode) {
+          // Reload exam data after update to reflect changes
+          await loadExamForEdit(editExamId);
+        } else {
           // Reset form only for create mode
           setExamInfo({
             title: '',
             description: '',
-            timeLimit: 60,
+            timeLimit: 30,
             startTime: '',
             endTime: '',
             maxAttempts: 1,
+            isPublic: true,
             selectedQuestions: []
           });
         }
@@ -378,6 +384,26 @@ const CreateExam = () => {
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500 resize-none"
               />
+            </div>
+
+            {/* Public/Private Toggle */}
+            <div className="mt-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={examInfo.isPublic}
+                  onChange={(e) => handleExamInfoChange('isPublic', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <div>
+                  <span className="text-sm font-semibold text-black">Công khai đề thi</span>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {examInfo.isPublic 
+                      ? 'Đề thi này sẽ hiển thị trong kết quả tìm kiếm cho tất cả người dùng' 
+                      : 'Đề thi này sẽ chỉ hiển thị cho bạn (không xuất hiện trong tìm kiếm)'}
+                  </p>
+                </div>
+              </label>
             </div>
           </div>
 

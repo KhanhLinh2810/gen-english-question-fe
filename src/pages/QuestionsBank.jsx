@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import SidebarMenu from '../components/SidebarMenu';
@@ -7,11 +8,12 @@ import EditQuestionView from '../components/EditQuestionView';
 import { getQuestions, deleteQuestion, getQuestionDetail } from '../api/questionApi.js';
 
 const QuestionsBank = () => {
+  const currentUser = useSelector(state => state.user.currentUser);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '', // Combined search for content and tags
-    is_current_user_only: true
+    is_current_user_only: false // Show all questions by default
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -41,8 +43,12 @@ const QuestionsBank = () => {
       const params = {
         page,
         limit: pagination.limit,
-        is_current_user_only: filters.is_current_user_only
       };
+      
+      // Only add is_current_user_only if user wants to filter
+      if (filters.is_current_user_only) {
+        params.is_current_user_only = true;
+      }
 
       // Add search parameters if search term exists
       if (filters.search && filters.search.trim()) {
@@ -143,7 +149,7 @@ const QuestionsBank = () => {
   const clearFilters = () => {
     setFilters({
       search: '',
-      is_current_user_only: true
+      is_current_user_only: false
     });
     setTimeout(() => loadQuestions(1), 100);
   };
@@ -336,23 +342,31 @@ const QuestionsBank = () => {
                       )}
                     </div>
                     
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 ml-4">
-                      <button
-                        onClick={() => handleEditQuestion(question.id)}
-                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition"
-                        title="Chỉnh sửa"
-                      >
-                        <span className="text-lg">✏️</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteQuestion(question.id)}
-                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition"
-                        title="Xóa"
-                      >
-                        <span className="text-lg">🗑️</span>
-                      </button>
-                    </div>
+                    {/* Actions - Only show for creator */}
+                    {question.creator_id && currentUser && question.creator_id === currentUser.id && (
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={() => handleEditQuestion(question.id)}
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition"
+                          title="Chỉnh sửa"
+                        >
+                          <span className="text-lg">✏️</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuestion(question.id)}
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition"
+                          title="Xóa"
+                        >
+                          <span className="text-lg">🗑️</span>
+                        </button>
+                      </div>
+                    )}
+                    {/* Show message if question has no creator (system question) */}
+                    {!question.creator_id && (
+                      <div className="ml-4 text-xs text-gray-500 italic">
+                        Câu hỏi từ hệ thống
+                      </div>
+                    )}
                   </div>
 
                   {/* Choices */}

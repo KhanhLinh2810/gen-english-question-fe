@@ -15,6 +15,10 @@ import Settings from "./pages/Settings.jsx";
 import ManualQuestions from "./pages/ManualQuestions.jsx";
 import QuestionsBank from "./pages/QuestionsBank.jsx";
 import ExamBank from "./pages/ExamBank.jsx";
+import TakeExam from "./pages/TakeExam.jsx";
+import ExamResult from "./pages/ExamResult.jsx";
+import ExamReview from "./pages/ExamReview.jsx";
+import ExamHistory from "./pages/ExamHistory.jsx";
 export default function App() {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -52,6 +56,10 @@ export default function App() {
           <Route path="/manual-questions" element={<ManualQuestions/>}/>
           <Route path="/questions" element={<QuestionsBank/>}/>
           <Route path="/exam-bank" element={<ExamBank/>}/>
+          <Route path="/take-exam" element={<TakeExam/>}/>
+          <Route path="/exam-result" element={<ExamResult/>}/>
+          <Route path="/exam-review" element={<ExamReview/>}/>
+          <Route path="/history" element={<ExamHistory/>}/>
         </Routes>
       </main>
       
