@@ -11,16 +11,34 @@ const SidebarMenu = () => {
   const user = useSelector((state) => state.user.currentUser);
   const dispatch = useDispatch();
   const location = useLocation();
+  const user = useSelector(state => state.user.currentUser);
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const response = await getMe();
+        if (response.code === 'SUCCESS' && response.data) {
+          setUserInfo(response.data);
+        }
+      } catch (error) {
+        // Silently fail, use Redux user as fallback
+      }
+    };
+
+    if (user) {
+      loadUserInfo();
+    }
+  }, [user]);
+
   const menuItems = [
-    { label: "Trang chủ", icon: "🏠", path: "/" },
-    { label: "Tạo đề thi", icon: "📝", path: "/CreateExam" },
-    { label: "Tạo câu hỏi thủ công", icon: "✏️", path: "/manual-questions" },
-    { label: "Ngân hàng câu hỏi", icon: "📚", path: "/questions" },
-    { label: "Ngân hàng đề thi", icon: "📋", path: "/exam-bank" },
-    { label: "Quản lý bài thi", icon: "📊", path: "/manage-exams" },
-    { label: "Tìm kiếm đề thi", icon: "🔍", path: "/search-exams" },
-    { label: "Lịch sử làm bài", icon: "⏱️", path: "/history" },
-    { label: "Cài đặt", icon: "⚙️", path: "/settings" },
+    { label: 'Trang chủ', icon: '🏠', path: '/' },
+    { label: 'Tạo đề thi', icon: '📝', path: '/CreateExam' },
+    { label: 'Tạo câu hỏi thủ công', icon: '✏️', path: '/manual-questions' },
+    { label: 'Ngân hàng câu hỏi', icon: '📚', path: '/questions' },
+    { label: 'Ngân hàng đề thi', icon: '📋', path: '/exam-bank' },
+    { label: 'Lịch sử làm bài', icon: '⏱️', path: '/history' },
+    { label: 'Cài đặt', icon: '⚙️', path: '/settings' },
   ];
   const [userInfo, setUserInfo] = useState(null);
   useEffect(() => {
@@ -60,7 +78,7 @@ const SidebarMenu = () => {
       {/* Logo & Title */}
       <div className="text-center mb-6">
         <img src={logo} alt="Logo" className="w-10 h-10 rounded mx-auto mb-2" />
-        <h1 className="text-lg font-bold">EnglishHub</h1>
+        <h1 className="text-lg font-bold">eQuiz</h1>
         <span className="text-xs text-blue-300">Khởi nguồn tri thức</span>
       </div>
 
@@ -76,9 +94,8 @@ const SidebarMenu = () => {
           className="w-14 h-14 rounded-full border-2 border-white mx-auto mb-3"
         />
         <p className="font-semibold text-sm">
-          Xin chào {userInfo?.username || "User"}
+          Xin chào, {userInfo?.username || user?.username || 'Người dùng'}
         </p>
-        <p className="text-xs text-blue-200">Tài khoản Giáo viên</p>
       </div>
 
       {/* Menu Items */}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import SidebarMenu from '../components/SidebarMenu';
@@ -7,6 +8,7 @@ import ExamDetailView from '../components/ExamDetailView';
 import { getExams, getExamDetail, deleteExam } from '../api/examApi';
 
 const ExamBank = () => {
+  const currentUser = useSelector(state => state.user.currentUser);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +54,7 @@ const ExamBank = () => {
       const params = {
         page,
         limit: pagination.limit,
-        is_current_user_only: true, // Always show current user's exams
+        // Don't set is_current_user_only to show all public exams + own exams
       };
 
       // Only add search param if it has meaningful content
@@ -360,7 +362,7 @@ const ExamBank = () => {
                       {exam.list_question?.length || 0} câu hỏi • {exam.duration} phút
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <button
                       onClick={() => handleViewDetail(exam.id)}
                       className="text-green-500 hover:text-green-700 transition"
@@ -368,20 +370,38 @@ const ExamBank = () => {
                     >
                       <span className="text-lg">👁️</span>
                     </button>
-                    <button
-                      onClick={() => handleEditClick(exam.id)}
-                      className="text-blue-500 hover:text-blue-700 transition"
-                      title="Chỉnh sửa"
-                    >
-                      <span className="text-lg">✏️</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(exam.id)}
-                      className="text-red-500 hover:text-red-700 transition"
-                      title="Xóa"
-                    >
-                      <span className="text-lg">🗑️</span>
-                    </button>
+                    {/* Only show edit/delete buttons for creator */}
+                    {exam.creator_id && currentUser && exam.creator_id === currentUser.id && (
+                      <>
+                        <button
+                          onClick={() => handleEditClick(exam.id)}
+                          className="text-blue-500 hover:text-blue-700 transition"
+                          title="Chỉnh sửa"
+                        >
+                          <span className="text-lg">✏️</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(exam.id)}
+                          className="text-red-500 hover:text-red-700 transition"
+                          title="Xóa"
+                        >
+                          <span className="text-lg">🗑️</span>
+                        </button>
+                      </>
+                    )}
+                    {/* Show "Take Exam" button for all users (not creator) */}
+                    {(!exam.creator_id || !currentUser || exam.creator_id !== currentUser.id) && (
+                      <button
+                        onClick={() => {
+                          window.location.href = `/take-exam?exam_id=${exam.id}`;
+                        }}
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition font-medium flex items-center gap-2"
+                        title="Làm bài thi"
+                      >
+                        <span>🚀</span>
+                        <span>Làm bài thi</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -396,6 +416,16 @@ const ExamBank = () => {
                   </div>
                   <div>
                     <span className="font-medium">Lượt thi tối đa:</span> {exam.max_attempt || 'Không giới hạn'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Trạng thái:</span>{' '}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      exam.is_public !== false 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {exam.is_public !== false ? 'Công khai' : 'Riêng tư'}
+                    </span>
                   </div>
                   {exam.creator && (
                     <div>

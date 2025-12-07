@@ -17,6 +17,10 @@ import Settings from "./pages/Settings.jsx";
 import ManualQuestions from "./pages/ManualQuestions.jsx";
 import QuestionsBank from "./pages/QuestionsBank.jsx";
 import ExamBank from "./pages/ExamBank.jsx";
+import TakeExam from "./pages/TakeExam.jsx";
+import ExamResult from "./pages/ExamResult.jsx";
+import ExamReview from "./pages/ExamReview.jsx";
+import ExamHistory from "./pages/ExamHistory.jsx";
 export default function App() {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -45,79 +49,92 @@ export default function App() {
     <div className="min-h-screen bg-gray-100">
       <main className={!hideLayout ? "" : "min-h-screen w-full"}>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/GenQuestion"
-            element={
-              <ProtectedRoute>
-                <GenQuestion />
-              </ProtectedRoute>
-            }
-          />
+//           <Route
+//             path="/"
+//             element={
+//               <ProtectedRoute>
+//                 <HomePage />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/GenQuestion"
+//             element={
+//               <ProtectedRoute>
+//                 <GenQuestion />
+//               </ProtectedRoute>
+//             }
+//           />
 
-          <Route
-            path="/login"
-            element={
-              <RedirectIfLoggedIn>
-                <Login />
-              </RedirectIfLoggedIn>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <RedirectIfLoggedIn>
-                <Register />
-              </RedirectIfLoggedIn>
-            }
-          />
-          <Route
-            path="/CreateExam"
-            element={
-              <ProtectedRoute>
-                <CreateExam />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manual-questions"
-            element={
-              <ProtectedRoute>
-                <ManualQuestions />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/questions"
-            element={
-              <ProtectedRoute>
-                <QuestionsBank />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/exam-bank"
-            element={
-              <ProtectedRoute>
-                <ExamBank />
-              </ProtectedRoute>
-            }
-          />
+//           <Route
+//             path="/login"
+//             element={
+//               <RedirectIfLoggedIn>
+//                 <Login />
+//               </RedirectIfLoggedIn>
+//             }
+//           />
+//           <Route
+//             path="/register"
+//             element={
+//               <RedirectIfLoggedIn>
+//                 <Register />
+//               </RedirectIfLoggedIn>
+//             }
+//           />
+//           <Route
+//             path="/CreateExam"
+//             element={
+//               <ProtectedRoute>
+//                 <CreateExam />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/settings"
+//             element={
+//               <ProtectedRoute>
+//                 <Settings />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/manual-questions"
+//             element={
+//               <ProtectedRoute>
+//                 <ManualQuestions />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/questions"
+//             element={
+//               <ProtectedRoute>
+//                 <QuestionsBank />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/exam-bank"
+//             element={
+//               <ProtectedRoute>
+//                 <ExamBank />
+//               </ProtectedRoute>
+//             }
+//           />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/GenQuestion" element={<GenQuestion />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/CreateExam" element={<CreateExam/>}/>
+          <Route path="/settings" element={<Settings/>}/>
+          <Route path="/manual-questions" element={<ManualQuestions/>}/>
+          <Route path="/questions" element={<QuestionsBank/>}/>
+          <Route path="/exam-bank" element={<ExamBank/>}/>
+          <Route path="/take-exam" element={<TakeExam/>}/>
+          <Route path="/exam-result" element={<ExamResult/>}/>
+          <Route path="/exam-review" element={<ExamReview/>}/>
+          <Route path="/history" element={<ExamHistory/>}/>
         </Routes>
       </main>
 

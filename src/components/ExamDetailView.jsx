@@ -5,13 +5,17 @@ const ExamDetailView = ({ exam, onBack }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Không giới hạn';
-    return new Date(dateString).toLocaleString('vi-VN');
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
+    const displayHours = date.getHours() % 12 || 12;
+    return `${day}/${month}/${year}, ${displayHours}:${minutes} ${ampm}`;
   };
 
-  const questionTypes = {
-    1: 'Khác',
-    2: 'Từ vựng'
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6" style={{ minHeight: 'calc(100vh - 32px)' }}>
@@ -32,127 +36,101 @@ const ExamDetailView = ({ exam, onBack }) => {
       {/* Exam Title */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white mb-6">
         <h2 className="text-2xl font-bold mb-2">{exam.title}</h2>
-        <p className="text-blue-100">Đề thi {exam.list_question?.length || 0} câu hỏi • {exam.duration} phút</p>
       </div>
 
-      {/* Exam Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Thông tin chung</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Thời gian:</span>
-              <span className="font-medium text-gray-800">{exam.duration} phút</span>
+      {/* Exam Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-xl">👤</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Số câu hỏi:</span>
-              <span className="font-medium text-gray-800">{exam.list_question?.length || 0} câu</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Lượt thi tối đa:</span>
-              <span className="font-medium text-gray-800">{exam.max_attempt || 'Không giới hạn'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tổng điểm:</span>
-              <span className="font-medium text-gray-800">
-                {exam.list_question?.reduce((total, q) => total + (q.score_in_exam || q.score || 0), 0) || 0} điểm
-              </span>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Người tạo đề thi:</p>
+              <p className="font-semibold text-gray-800">{exam.creator?.username || 'Hệ thống'}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Thời gian thi</h3>
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="text-gray-600">Mở đề:</span>
-              <p className="font-medium text-gray-800">{formatDate(exam.earliest_start_time)}</p>
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 text-xl">📝</span>
             </div>
             <div>
-              <span className="text-gray-600">Đóng đề:</span>
+              <p className="text-xs text-gray-500 mb-1">Số lượng câu hỏi:</p>
+              <p className="font-semibold text-gray-800">{exam.list_question?.length || exam.total_question || 0} câu</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-purple-600 text-xl">⏰</span>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Thời gian thi:</p>
+              <p className="font-semibold text-gray-800">{exam.duration} phút</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Time and Limit Section */}
+      <div className="bg-gray-50 rounded-lg p-6 mb-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Thời gian và Giới hạn</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 text-sm">●</span>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Bắt đầu sớm nhất:</p>
+              <p className="font-medium text-gray-800">{formatDate(exam.earliest_start_time)}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-sm">●</span>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Bắt đầu muộn nhất:</p>
               <p className="font-medium text-gray-800">{formatDate(exam.lastest_start_time)}</p>
             </div>
           </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-sm">👥</span>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Giới hạn thí sinh:</p>
+              <p className="font-medium text-gray-800">{exam.max_attempt ? `${exam.max_attempt} lượt` : 'Không giới hạn'}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Description */}
+      {/* Note from creator - Warning box */}
       {exam.note && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Mô tả</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-gray-700">{exam.note}</p>
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <span className="text-yellow-600 text-xl">⚠️</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-semibold text-yellow-800 mb-1">
+                  CHÚ THÍCH TỪ NGƯỜI TẠO ĐỀ:
+                </h3>
+                <p className="text-sm text-yellow-700">{exam.note}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
-
-      {/* Questions List */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">
-          Danh sách câu hỏi ({exam.list_question?.length || 0} câu)
-        </h3>
-        <div className="space-y-4">
-          {exam.list_question && exam.list_question.length > 0 ? (
-            exam.list_question.map((question, index) => (
-              <div key={question.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">
-                      Câu {index + 1}
-                    </span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
-                      {questionTypes[question.type] || 'Khác'}
-                    </span>
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-medium">
-                      {question.score_in_exam || question.score || 0} điểm
-                    </span>
-                  </div>
-                </div>
-                
-                <h4 className="font-medium text-gray-800 mb-2">{question.content}</h4>
-                
-                {question.description && (
-                  <p className="text-gray-600 text-sm mb-3 italic">{question.description}</p>
-                )}
-
-                {/* Choices */}
-                {question.choices && question.choices.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Các lựa chọn:</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {question.choices.map((choice, choiceIndex) => (
-                        <div
-                          key={choice.id}
-                          className={`p-2 rounded text-sm border ${
-                            choice.is_correct
-                              ? 'bg-green-50 border-green-200 text-green-800'
-                              : 'bg-white border-gray-200 text-gray-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {choice.is_correct && <span className="text-green-600 font-bold">✓</span>}
-                            <span className="font-medium">{String.fromCharCode(65 + choiceIndex)}.</span>
-                            <span>{choice.content}</span>
-                          </div>
-                          {choice.explanation && (
-                            <div className="text-xs text-gray-600 italic ml-6 mt-1">
-                              Giải thích: {choice.explanation}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Đề thi chưa có câu hỏi nào</p>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Creator Info */}
       {exam.creator && (
@@ -171,6 +149,20 @@ const ExamDetailView = ({ exam, onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Start Exam Button */}
+      <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center">
+        <button
+          onClick={() => {
+            // Navigate to take exam page
+            window.location.href = `/take-exam?exam_id=${exam.id}`;
+          }}
+          className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg transition flex items-center gap-2"
+        >
+          <span>🚀</span>
+          <span>Bắt đầu làm bài</span>
+        </button>
+      </div>
     </div>
   );
 };
