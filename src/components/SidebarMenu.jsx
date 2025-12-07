@@ -1,10 +1,15 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
-import { getMe } from '../api/userApi';
-import logo from '../assets/logo.png';
+import { Link, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import logo from "../assets/logo.png";
+import { logOut } from "../api/apiCaller";
+import { toast } from "react-toastify";
+import { getMe } from "../api/userApi.js";
+import { useEffect, useState } from "react";
+import { setUser } from "../pages/redux/userSlice.js";
 
 const SidebarMenu = () => {
+  const user = useSelector((state) => state.user.currentUser);
+  const dispatch = useDispatch();
   const location = useLocation();
   const user = useSelector(state => state.user.currentUser);
   const [userInfo, setUserInfo] = useState(null);
@@ -35,14 +40,41 @@ const SidebarMenu = () => {
     { label: 'Lịch sử làm bài', icon: '⏱️', path: '/history' },
     { label: 'Cài đặt', icon: '⚙️', path: '/settings' },
   ];
+  const [userInfo, setUserInfo] = useState(null);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await getMe();
+        if (response.code === "SUCCESS" && response.data) {
+          const userData = response.data;
+          setUserInfo(userData);
+          dispatch(setUser(userData));
+        }
+      } catch (error) {
+        console.error("Error loading user info in SidebarMenu:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    try {
+      logOut();
+      toast.success("Đăng xuất thành công");
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 700);
+    } catch (error) {
+      toast.error("Đăng xuất thất bại. Vui lòng thử lại.");
+    }
   };
 
   return (
-    <div className="w-96 bg-gradient-to-b from-slate-800 via-slate-900 to-blue-900 text-white p-6 rounded-2xl flex flex-col" style={{minHeight: 'calc(100vh - 32px)'}}>
+    <div
+      className="w-96 bg-gradient-to-b from-slate-800 via-slate-900 to-blue-900 text-white p-6 rounded-2xl flex flex-col"
+      style={{ minHeight: "calc(100vh - 32px)" }}
+    >
       {/* Logo & Title */}
       <div className="text-center mb-6">
         <img src={logo} alt="Logo" className="w-10 h-10 rounded mx-auto mb-2" />
@@ -53,7 +85,11 @@ const SidebarMenu = () => {
       {/* User Info Card */}
       <div className="bg-white/10 rounded-lg p-4 mb-6 text-center">
         <img
-          src={userInfo?.avatar_url || user?.avatar || 'https://via.placeholder.com/60'}
+          src={userInfo?.avatar_url || 'https://via.placeholder.com/60'}
+          // src={
+          //   userInfo?.avatar_url.replace("http://localhost:3000", "") ||
+          //   "https://via.placeholder.com/60"
+          // }
           alt="Avatar"
           className="w-14 h-14 rounded-full border-2 border-white mx-auto mb-3"
         />
@@ -70,8 +106,8 @@ const SidebarMenu = () => {
             to={item.path}
             className={`flex items-center gap-4 px-4 py-3 rounded-lg transition text-sm ${
               location.pathname === item.path
-                ? 'bg-white text-slate-900 font-semibold shadow-md'
-                : 'bg-white/90 text-slate-800 hover:bg-white hover:shadow-sm'
+                ? "bg-white text-slate-900 font-semibold shadow-md"
+                : "bg-white/90 text-slate-800 hover:bg-white hover:shadow-sm"
             }`}
           >
             <span className="text-lg">{item.icon}</span>

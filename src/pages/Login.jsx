@@ -1,11 +1,16 @@
+import Cookies from "js-cookie";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { jwtDecode } from "jwt-decode";
 import { login } from "../api/apiCaller.js";
-import { setUser } from "../pages/redux/userSlice.js";
+import { setUser } from "./redux/userSlice.js";
 import { toast } from "react-toastify";
-import { AuthLayout, InputField, AuthButton, AuthLink } from "../components/auth";
+import {
+  AuthLayout,
+  InputField,
+  AuthButton,
+  AuthLink,
+} from "../components/auth/index.js";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -14,7 +19,6 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const navigator = useNavigate();
-  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = {};
@@ -24,55 +28,43 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = validateForm();
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+  e.preventDefault();
+  const newErrors = validateForm();
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+
+  try {
+    const data = await login(username, password);
+
+    const accessToken = data?.data?.access_token;
+    if (!accessToken) {
+      throw new Error("Token không hợp lệ");
     }
 
-    setIsLoading(true);
-    setErrors({});
+    Cookies.set("access_token", accessToken, {
+      expires: 1, // token lưu 1 ngày
+      secure: true, // chỉ gửi qua HTTPS
+      sameSite: "Strict", 
+      path: "/",  // cookie dùng trên toàn site
+    });
 
-    try {
-      const data = await login(username, password);
+    toast.success("Đăng nhập thành công!");
 
-      // backend trả về cấu trúc: { code, message, data: { access_token } }
-      // hoặc một số endpoint trả về { token: { accessToken, refreshToken } }
-      const accessToken =
-        data?.token?.accessToken || data?.data?.access_token || data?.access_token;
+    navigator("/");
+  } catch (err) {
+    console.error("Đăng nhập thất bại:", err);
+    toast.error(err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-      if (!accessToken) {
-        throw new Error('Token không hợp lệ');
-      }
-
-      // ✅ Lưu token vào localStorage
-      localStorage.setItem("token", accessToken);
-
-      // Nếu có refresh token, lưu luôn
-      if (data?.token?.refreshToken) {
-        localStorage.setItem('refreshToken', data.token.refreshToken);
-      }
-
-      // ✅ Giải mã token để lấy thông tin user
-      const decodedUser = jwtDecode(accessToken);
-
-      // ✅ Cập nhật user vào Redux
-      dispatch(setUser(decodedUser));
-
-      toast.success("Đăng nhập thành công!");
-      console.log("User:", decodedUser);
-
-      // ✅ Điều hướng
-      navigator("/");
-    } catch (err) {
-      console.error("Đăng nhập thất bại:", err);
-      toast.error("Sai tài khoản hoặc mật khẩu!");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <AuthLayout title="Đăng nhập">
