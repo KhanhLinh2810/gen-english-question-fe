@@ -1,20 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout, setUser } from "./pages/redux/userSlice.js";
 import { jwtDecode } from "jwt-decode";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import HomePage from "./pages/HomePage.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import GenQuestion from "./pages/GenQuestion.jsx";
-import Header from "./components/Header.jsx";
-import Sidebar from "./components/Sidebar.jsx";
 import CreateExam from "./pages/CreateExam.jsx";
+import Settings from "./pages/Settings.jsx";
+import ManualQuestions from "./pages/ManualQuestions.jsx";
+import QuestionsBank from "./pages/QuestionsBank.jsx";
+import ExamBank from "./pages/ExamBank.jsx";
+import TakeExam from "./pages/TakeExam.jsx";
+import ExamResult from "./pages/ExamResult.jsx";
+import ExamReview from "./pages/ExamReview.jsx";
+import ExamHistory from "./pages/ExamHistory.jsx";
 export default function App() {
   const dispatch = useDispatch();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // ✅ Kiểm tra token
   useEffect(() => {
@@ -34,28 +41,41 @@ export default function App() {
   const noLayoutRoutes = ["/login", "/register"];
   const hideLayout = noLayoutRoutes.includes(location.pathname);
 
-  // Sidebar controls
-  const openSidebar = () => setIsSidebarOpen(true);
-  const closeSidebar = () => setIsSidebarOpen(false);
+  // Sidebar modal removed; homepage uses permanent sidebar menu
 
   return (
-    <div className="min-h-screen flex flex-col bg-white ">
-      {!hideLayout && <Header onCreateQuestionClick={openSidebar} />}
-
-      <main className={!hideLayout ? "pt-16" : ""} >
+    <div className="min-h-screen bg-gray-100">
+      <main className={!hideLayout ? "" : "min-h-screen w-full"} >
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/GenQuestion" element={<GenQuestion />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/CreateExam" element={<CreateExam/>}/>
+          <Route path="/settings" element={<Settings/>}/>
+          <Route path="/manual-questions" element={<ManualQuestions/>}/>
+          <Route path="/questions" element={<QuestionsBank/>}/>
+          <Route path="/exam-bank" element={<ExamBank/>}/>
+          <Route path="/take-exam" element={<TakeExam/>}/>
+          <Route path="/exam-result" element={<ExamResult/>}/>
+          <Route path="/exam-review" element={<ExamReview/>}/>
+          <Route path="/history" element={<ExamHistory/>}/>
         </Routes>
       </main>
-
-      {/* Sidebar hiển thị GenQuestion */}
-      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} title="Tạo câu hỏi">
-        <GenQuestion onCancel={closeSidebar} />
-      </Sidebar>
+      
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }
