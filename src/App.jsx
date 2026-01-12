@@ -50,79 +50,112 @@ export default function App() {
       <main className={!hideLayout ? "" : "min-h-screen w-full"}>
         <Routes>
 //           <Route
-//             path="/"
-//             element={
-//               <ProtectedRoute>
-//                 <HomePage />
-//               </ProtectedRoute>
-//             }
-//           />
-//           <Route
-//             path="/GenQuestion"
-//             element={
-//               <ProtectedRoute>
-//                 <GenQuestion />
-//               </ProtectedRoute>
-//             }
-//           />
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/GenQuestion"
+            element={
+              <ProtectedRoute>
+                <GenQuestion />
+              </ProtectedRoute>
+            }
+          />
 
-//           <Route
-//             path="/login"
-//             element={
-//               <RedirectIfLoggedIn>
-//                 <Login />
-//               </RedirectIfLoggedIn>
-//             }
-//           />
-//           <Route
-//             path="/register"
-//             element={
-//               <RedirectIfLoggedIn>
-//                 <Register />
-//               </RedirectIfLoggedIn>
-//             }
-//           />
-//           <Route
-//             path="/CreateExam"
-//             element={
-//               <ProtectedRoute>
-//                 <CreateExam />
-//               </ProtectedRoute>
-//             }
-//           />
-//           <Route
-//             path="/settings"
-//             element={
-//               <ProtectedRoute>
-//                 <Settings />
-//               </ProtectedRoute>
-//             }
-//           />
-//           <Route
-//             path="/manual-questions"
-//             element={
-//               <ProtectedRoute>
-//                 <ManualQuestions />
-//               </ProtectedRoute>
-//             }
-//           />
-//           <Route
-//             path="/questions"
-//             element={
-//               <ProtectedRoute>
-//                 <QuestionsBank />
-//               </ProtectedRoute>
-//             }
-//           />
-//           <Route
-//             path="/exam-bank"
-//             element={
-//               <ProtectedRoute>
-//                 <ExamBank />
-//               </ProtectedRoute>
-//             }
-//           />
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/login"
+            element={
+              <RedirectIfLoggedIn>
+                <Login />
+              </RedirectIfLoggedIn>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RedirectIfLoggedIn>
+                <Register />
+              </RedirectIfLoggedIn>
+            }
+          />
+          <Route
+            path="/CreateExam"
+            element={
+              <ProtectedRoute>
+                <CreateExam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manual-questions"
+            element={
+              <ProtectedRoute>
+                <ManualQuestions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/questions"
+            element={
+              <ProtectedRoute>
+                <QuestionsBank />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exam-bank"
+            element={
+              <ProtectedRoute>
+                <ExamBank />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/take-exam"
+            element={
+              <ProtectedRoute>
+                <TakeExam />
+              </ProtectedRoute>
+            }
+          />  
+          <Route
+            path="/exam-result"
+            element={
+              <ProtectedRoute>
+                <ExamResult />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exam-review"
+            element={
+              <ProtectedRoute>
+                <ExamReview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <ExamHistory />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* <Route path="/" element={<HomePage />} />
           <Route path="/GenQuestion" element={<GenQuestion />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -134,7 +167,7 @@ export default function App() {
           <Route path="/take-exam" element={<TakeExam/>}/>
           <Route path="/exam-result" element={<ExamResult/>}/>
           <Route path="/exam-review" element={<ExamReview/>}/>
-          <Route path="/history" element={<ExamHistory/>}/>
+          <Route path="/history" element={<ExamHistory/>}/> */}
         </Routes>
       </main>
 

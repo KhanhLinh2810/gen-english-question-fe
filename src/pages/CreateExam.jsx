@@ -1,41 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { useSearchParams } from 'react-router-dom';
-import SidebarMenu from '../components/SidebarMenu';
-import { getQuestions } from '../api/questionApi.js';
-import { createExam, getExamDetail, updateExam } from '../api/examApi.js';
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useSearchParams } from "react-router-dom";
+import SidebarMenu from "../components/SidebarMenu";
+import { ChatBubbleLeftIcon, StarIcon } from "@heroicons/react/24/outline";
+import { getQuestions } from "../api/questionApi.js";
+import { createExam, getExamDetail, updateExam } from "../api/examApi.js";
 
 const CreateExam = () => {
   const [searchParams] = useSearchParams();
-  const editExamId = searchParams.get('edit');
+  const editExamId = searchParams.get("edit");
   const isEditMode = !!editExamId;
 
   const [examInfo, setExamInfo] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     timeLimit: 30, // minutes - default 30
-    startTime: '',
-    endTime: '',
+    startTime: "",
+    endTime: "",
     maxAttempts: 1,
     isPublic: true, // Default to public
-    selectedQuestions: []
+    selectedQuestions: [],
   });
 
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    search: '',
-    selectedFilter: 'all' // all, selected, unselected
+    search: "",
+    selectedFilter: "all", // all, selected, unselected
   });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
-    total: 0
+    total: 0,
   });
 
   const questionTypes = {
-    1: 'Khác',
-    2: 'Từ vựng'
+    1: "Khác",
+    2: "Từ vựng",
   };
 
   // Load exam data for editing
@@ -43,25 +44,31 @@ const CreateExam = () => {
     try {
       setLoading(true);
       const response = await getExamDetail(examId);
-      if (response.code === 'SUCCESS') {
+      if (response.code === "SUCCESS") {
         const exam = response.data;
         setExamInfo({
           title: exam.title,
-          description: exam.note || '',
+          description: exam.note || "",
           timeLimit: exam.duration || 30,
-          startTime: exam.earliest_start_time ? new Date(exam.earliest_start_time).toISOString().slice(0, 16) : '',
-          endTime: exam.lastest_start_time ? new Date(exam.lastest_start_time).toISOString().slice(0, 16) : '',
+          startTime: exam.earliest_start_time
+            ? new Date(exam.earliest_start_time).toISOString().slice(0, 16)
+            : "",
+          endTime: exam.lastest_start_time
+            ? new Date(exam.lastest_start_time).toISOString().slice(0, 16)
+            : "",
           maxAttempts: exam.max_attempt || 1,
           isPublic: exam.is_public !== undefined ? exam.is_public : true,
-          selectedQuestions: exam.list_question.map(q => ({
+          selectedQuestions: exam.list_question.map((q) => ({
             id: q.id,
-            score: q.score_in_exam || q.score
-          }))
+            score: q.score_in_exam || q.score,
+          })),
         });
       }
     } catch (error) {
-      console.error('Error loading exam for edit:', error);
-      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tải thông tin đề thi.';
+      console.error("Error loading exam for edit:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Có lỗi xảy ra khi tải thông tin đề thi.";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -75,7 +82,7 @@ const CreateExam = () => {
       const params = {
         page,
         limit: pagination.limit,
-        is_current_user_only: true
+        is_current_user_only: true,
       };
 
       if (filters.search && filters.search.trim()) {
@@ -83,20 +90,35 @@ const CreateExam = () => {
         params.content = searchTerm;
         params.tag = searchTerm;
       }
-      
+
       const response = await getQuestions(params);
-      
-      if (response.code === 'SUCCESS') {
-        setQuestions(response.data.rows || []);
-        setPagination(prev => ({
+
+      if (response.code === "SUCCESS") {
+        // Support response shapes where data is an array or data.rows
+        let list = [];
+        if (Array.isArray(response.data)) {
+          list = response.data;
+        } else if (response.data && Array.isArray(response.data.rows)) {
+          list = response.data.rows;
+        } else if (Array.isArray(response)) {
+          list = response;
+        }
+
+        const totalItems =
+          response.meta?.total_items ??
+          (response.data && response.data.count) ??
+          (Array.isArray(response.data) ? response.data.length : list.length);
+
+        setQuestions(list || []);
+        setPagination((prev) => ({
           ...prev,
           page,
-          total: response.meta?.total_items || response.data.count || 0
+          total: totalItems || 0,
         }));
       }
     } catch (error) {
-      console.error('Error loading questions:', error);
-      toast.error('Không thể tải danh sách câu hỏi');
+      console.error("Error loading questions:", error);
+      toast.error("Không thể tải danh sách câu hỏi");
     } finally {
       setLoading(false);
     }
@@ -104,20 +126,20 @@ const CreateExam = () => {
 
   // Handle exam info change
   const handleExamInfoChange = (field, value) => {
-    setExamInfo(prev => ({
+    setExamInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   // Handle filter change
   const handleFilterChange = (field, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
-    if (field === 'search') {
+    if (field === "search") {
       // Auto search with debounce
       setTimeout(() => loadQuestions(1), 500);
     } else {
@@ -127,24 +149,31 @@ const CreateExam = () => {
 
   // Toggle question selection
   const toggleQuestionSelection = (question) => {
-    setExamInfo(prev => {
-      const isSelected = prev.selectedQuestions.some(q => q.id === question.id);
-      
+    setExamInfo((prev) => {
+      const isSelected = prev.selectedQuestions.some(
+        (q) => q.id === question.id
+      );
+
       if (isSelected) {
         // Remove question
         return {
           ...prev,
-          selectedQuestions: prev.selectedQuestions.filter(q => q.id !== question.id)
+          selectedQuestions: prev.selectedQuestions.filter(
+            (q) => q.id !== question.id
+          ),
         };
       } else {
         // Add question with default score
         return {
           ...prev,
-          selectedQuestions: [...prev.selectedQuestions, {
-            id: question.id,
-            question: question,
-            score: question.score // Default to original score
-          }]
+          selectedQuestions: [
+            ...prev.selectedQuestions,
+            {
+              id: question.id,
+              question: question,
+              score: question.score, // Default to original score
+            },
+          ],
         };
       }
     });
@@ -152,36 +181,38 @@ const CreateExam = () => {
 
   // Update question score in exam
   const updateQuestionScore = (questionId, newScore) => {
-    setExamInfo(prev => ({
+    setExamInfo((prev) => ({
       ...prev,
-      selectedQuestions: prev.selectedQuestions.map(q => 
+      selectedQuestions: prev.selectedQuestions.map((q) =>
         q.id === questionId ? { ...q, score: newScore } : q
-      )
+      ),
     }));
   };
 
   // Select all visible questions
   const selectAllVisible = () => {
-    const newSelections = questions.filter(q => 
-      !examInfo.selectedQuestions.some(sq => sq.id === q.id)
-    ).map(q => ({
-      id: q.id,
-      question: q,
-      score: q.score
-    }));
+    const newSelections = questions
+      .filter((q) => !examInfo.selectedQuestions.some((sq) => sq.id === q.id))
+      .map((q) => ({
+        id: q.id,
+        question: q,
+        score: q.score,
+      }));
 
-    setExamInfo(prev => ({
+    setExamInfo((prev) => ({
       ...prev,
-      selectedQuestions: [...prev.selectedQuestions, ...newSelections]
+      selectedQuestions: [...prev.selectedQuestions, ...newSelections],
     }));
   };
 
   // Deselect all visible questions
   const deselectAllVisible = () => {
-    const visibleIds = questions.map(q => q.id);
-    setExamInfo(prev => ({
+    const visibleIds = questions.map((q) => q.id);
+    setExamInfo((prev) => ({
       ...prev,
-      selectedQuestions: prev.selectedQuestions.filter(q => !visibleIds.includes(q.id))
+      selectedQuestions: prev.selectedQuestions.filter(
+        (q) => !visibleIds.includes(q.id)
+      ),
     }));
   };
 
@@ -194,46 +225,51 @@ const CreateExam = () => {
   const saveExam = async () => {
     // Validation
     if (!examInfo.title.trim()) {
-      toast.error('Vui lòng nhập tên đề thi');
+      toast.error("Vui lòng nhập tên đề thi");
       return;
     }
 
     if (!examInfo.startTime) {
-      toast.error('Vui lòng chọn thời gian mở đề');
+      toast.error("Vui lòng chọn thời gian mở đề");
       return;
     }
 
     if (!examInfo.endTime) {
-      toast.error('Vui lòng chọn thời gian đóng đề');
+      toast.error("Vui lòng chọn thời gian đóng đề");
       return;
     }
 
     if (new Date(examInfo.startTime) >= new Date(examInfo.endTime)) {
-      toast.error('Thời gian mở đề phải trước thời gian đóng đề');
+      toast.error("Thời gian mở đề phải trước thời gian đóng đề");
       return;
     }
 
     if (examInfo.selectedQuestions.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một câu hỏi');
+      toast.error("Vui lòng chọn ít nhất một câu hỏi");
       return;
     }
 
     try {
       setLoading(true);
-      
+
       // Prepare exam data for backend
       const examData = {
         title: examInfo.title.trim(),
-        note: examInfo.description.trim() || '', // Note is required but can be empty
+        note: examInfo.description.trim() || "", // Note is required but can be empty
         duration: examInfo.timeLimit ? parseInt(examInfo.timeLimit) : 30, // Default 30 if not provided
         earliest_start_time: new Date(examInfo.startTime).toISOString(),
-        lastest_start_time: examInfo.endTime ? new Date(examInfo.endTime).toISOString() : null,
+        lastest_start_time: examInfo.endTime
+          ? new Date(examInfo.endTime).toISOString()
+          : null,
         max_attempt: examInfo.maxAttempts || null,
-        is_public: examInfo.isPublic === true || examInfo.isPublic === false ? examInfo.isPublic : true, // Explicitly handle true/false
-        list_question: examInfo.selectedQuestions.map(q => ({
+        is_public:
+          examInfo.isPublic === true || examInfo.isPublic === false
+            ? examInfo.isPublic
+            : true, // Explicitly handle true/false
+        list_question: examInfo.selectedQuestions.map((q) => ({
           question_id: parseInt(q.id),
-          score: Math.round(q.score) // Convert to integer as required by validator
-        }))
+          score: Math.round(q.score), // Convert to integer as required by validator
+        })),
       };
 
       let response;
@@ -242,43 +278,47 @@ const CreateExam = () => {
       } else {
         response = await createExam(examData);
       }
-      
-      if (response.code === 'SUCCESS') {
-        toast.success(isEditMode ? 'Cập nhật đề thi thành công!' : 'Tạo đề thi thành công!');
-        
+
+      if (response.code === "SUCCESS") {
+        toast.success(
+          isEditMode ? "Cập nhật đề thi thành công!" : "Tạo đề thi thành công!"
+        );
+
         if (isEditMode) {
           // Reload exam data after update to reflect changes
           await loadExamForEdit(editExamId);
         } else {
           // Reset form only for create mode
           setExamInfo({
-            title: '',
-            description: '',
+            title: "",
+            description: "",
             timeLimit: 30,
-            startTime: '',
-            endTime: '',
+            startTime: "",
+            endTime: "",
             maxAttempts: 1,
             isPublic: true,
-            selectedQuestions: []
+            selectedQuestions: [],
           });
         }
         // Optionally redirect to exam bank
         // window.location.href = '/exam-bank';
       }
     } catch (error) {
-      console.error('Error creating exam:', error);
-      console.error('Error response:', error.response?.data);
-      
-      let errorMessage = 'Có lỗi xảy ra khi tạo đề thi';
-      
+      console.error("Error creating exam:", error);
+      console.error("Error response:", error.response?.data);
+
+      let errorMessage = "Có lỗi xảy ra khi tạo đề thi";
+
       if (error.response?.data?.errors) {
         // Validation errors from backend
         const validationErrors = error.response.data.errors;
-        errorMessage = `Lỗi validation: ${validationErrors.map(e => e.message).join(', ')}`;
+        errorMessage = `Lỗi validation: ${validationErrors
+          .map((e) => e.message)
+          .join(", ")}`;
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -302,43 +342,55 @@ const CreateExam = () => {
   return (
     <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
       {/* Sidebar */}
-      <div className="w-96">
+      <div className="w-80">
         <SidebarMenu />
       </div>
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="bg-white rounded-2xl shadow-sm p-6" style={{minHeight: 'calc(100vh - 32px)'}}>
+        <div
+          className="bg-white rounded-lg shadow-sm p-8"
+          style={{ minHeight: "calc(100vh - 32px)" }}
+        >
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-black mb-1">
-              {isEditMode ? 'Chỉnh sửa đề thi' : 'Tạo đề thi mới'}
+            <h1 className="text-3xl font-bold text-gray-800 mb-1">
+              {isEditMode ? "Chỉnh sửa đề thi" : "Tạo đề thi mới"}
             </h1>
-            <p className="text-gray-600 text-sm">Tạo đề thi từ ngân hàng câu hỏi</p>
           </div>
 
           {/* Exam Information */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-black mb-4">Thông tin đề thi</h2>
-            
+            <h2 className="text-lg font-semibold text-black mb-4">
+              Thông tin đề thi
+            </h2>
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">Tên đề thi *</label>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Tên đề thi *
+                </label>
                 <input
                   type="text"
                   value={examInfo.title}
-                  onChange={(e) => handleExamInfoChange('title', e.target.value)}
+                  onChange={(e) =>
+                    handleExamInfoChange("title", e.target.value)
+                  }
                   placeholder="Nhập tên đề thi"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">Thời gian giới hạn (phút)</label>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Thời gian giới hạn (phút)
+                </label>
                 <input
                   type="number"
                   min="1"
                   value={examInfo.timeLimit}
-                  onChange={(e) => handleExamInfoChange('timeLimit', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleExamInfoChange("timeLimit", parseInt(e.target.value))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
                 />
               </div>
@@ -346,40 +398,59 @@ const CreateExam = () => {
 
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">Thời gian mở đề</label>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Thời gian mở đề
+                </label>
                 <input
                   type="datetime-local"
                   value={examInfo.startTime}
-                  onChange={(e) => handleExamInfoChange('startTime', e.target.value)}
+                  onChange={(e) =>
+                    handleExamInfoChange("startTime", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">Thời gian đóng đề</label>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Thời gian đóng đề
+                </label>
                 <input
                   type="datetime-local"
                   value={examInfo.endTime}
-                  onChange={(e) => handleExamInfoChange('endTime', e.target.value)}
+                  onChange={(e) =>
+                    handleExamInfoChange("endTime", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-black mb-2">Số lượt thi tối đa</label>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Số lượt thi tối đa
+                </label>
                 <input
                   type="number"
                   min="1"
                   value={examInfo.maxAttempts}
-                  onChange={(e) => handleExamInfoChange('maxAttempts', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleExamInfoChange(
+                      "maxAttempts",
+                      parseInt(e.target.value)
+                    )
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-black mb-2">Mô tả đề thi</label>
+              <label className="block text-sm font-semibold text-black mb-2">
+                Mô tả đề thi
+              </label>
               <textarea
                 value={examInfo.description}
-                onChange={(e) => handleExamInfoChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleExamInfoChange("description", e.target.value)
+                }
                 placeholder="Nhập mô tả cho đề thi (tùy chọn)"
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500 resize-none"
@@ -392,15 +463,19 @@ const CreateExam = () => {
                 <input
                   type="checkbox"
                   checked={examInfo.isPublic}
-                  onChange={(e) => handleExamInfoChange('isPublic', e.target.checked)}
+                  onChange={(e) =>
+                    handleExamInfoChange("isPublic", e.target.checked)
+                  }
                   className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <div>
-                  <span className="text-sm font-semibold text-black">Công khai đề thi</span>
+                  <span className="text-sm font-semibold text-black">
+                    Công khai đề thi
+                  </span>
                   <p className="text-xs text-gray-600 mt-1">
-                    {examInfo.isPublic 
-                      ? 'Đề thi này sẽ hiển thị trong kết quả tìm kiếm cho tất cả người dùng' 
-                      : 'Đề thi này sẽ chỉ hiển thị cho bạn (không xuất hiện trong tìm kiếm)'}
+                    {examInfo.isPublic
+                      ? "Đề thi này sẽ hiển thị trong kết quả tìm kiếm cho tất cả người dùng"
+                      : "Đề thi này sẽ chỉ hiển thị cho bạn (không xuất hiện trong tìm kiếm)"}
                   </p>
                 </div>
               </label>
@@ -410,7 +485,9 @@ const CreateExam = () => {
           {/* Question Selection */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-black">Ngân hàng câu hỏi</h2>
+              <h2 className="text-lg font-semibold text-black">
+                Ngân hàng câu hỏi
+              </h2>
               <div className="text-sm text-gray-600">
                 Đã chọn: {examInfo.selectedQuestions.length} câu hỏi
               </div>
@@ -420,20 +497,28 @@ const CreateExam = () => {
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-black mb-2">Tìm kiếm câu hỏi</label>
+                  <label className="block text-sm font-semibold text-black mb-2">
+                    Tìm kiếm câu hỏi
+                  </label>
                   <input
                     type="text"
                     value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("search", e.target.value)
+                    }
                     placeholder="Nhập để tìm kiếm câu hỏi..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-black mb-2">Lọc theo trạng thái</label>
+                  <label className="block text-sm font-semibold text-black mb-2">
+                    Lọc theo trạng thái
+                  </label>
                   <select
                     value={filters.selectedFilter}
-                    onChange={(e) => handleFilterChange('selectedFilter', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("selectedFilter", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium bg-white"
                   >
                     <option value="all">Tất cả câu hỏi</option>
@@ -463,118 +548,161 @@ const CreateExam = () => {
               <div className="flex justify-center items-center py-12">
                 <div className="text-gray-500">Đang tải câu hỏi...</div>
               </div>
-            ) : (() => {
-              // Apply client-side filter
-              let filteredQuestions = questions;
-              if (filters.selectedFilter === 'selected') {
-                filteredQuestions = questions.filter(q => 
-                  examInfo.selectedQuestions.some(sq => sq.id === q.id)
-                );
-              } else if (filters.selectedFilter === 'unselected') {
-                filteredQuestions = questions.filter(q => 
-                  !examInfo.selectedQuestions.some(sq => sq.id === q.id)
-                );
-              }
+            ) : (
+              (() => {
+                // Apply client-side filter
+                let filteredQuestions = questions;
+                if (filters.selectedFilter === "selected") {
+                  filteredQuestions = questions.filter((q) =>
+                    examInfo.selectedQuestions.some((sq) => sq.id === q.id)
+                  );
+                } else if (filters.selectedFilter === "unselected") {
+                  filteredQuestions = questions.filter(
+                    (q) =>
+                      !examInfo.selectedQuestions.some((sq) => sq.id === q.id)
+                  );
+                }
 
-              return filteredQuestions.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-500">
-                    {filters.selectedFilter === 'selected' ? 'Chưa có câu hỏi nào được chọn' :
-                     filters.selectedFilter === 'unselected' ? 'Tất cả câu hỏi đã được chọn' :
-                     'Không có câu hỏi nào'}
+                return filteredQuestions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-500">
+                      {filters.selectedFilter === "selected"
+                        ? "Chưa có câu hỏi nào được chọn"
+                        : filters.selectedFilter === "unselected"
+                        ? "Tất cả câu hỏi đã được chọn"
+                        : "Không có câu hỏi nào"}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredQuestions.map((question, index) => {
-                  const isSelected = examInfo.selectedQuestions.some(q => q.id === question.id);
-                  const selectedQuestion = examInfo.selectedQuestions.find(q => q.id === question.id);
-                  
-                  return (
-                    <div key={question.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                      {/* Question Header */}
-                      <div className="flex items-start gap-4">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleQuestionSelection(question)}
-                          className="mt-2 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="font-semibold text-black">Câu {(pagination.page - 1) * pagination.limit + index + 1}</span>
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                              {questionTypes[question.type] || 'Khác'}
-                            </span>
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
-                              {question.score} điểm gốc
-                            </span>
-                            {question.tags && (
-                              <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-medium">
-                                {question.tags}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <h3 className="text-lg font-medium text-black mb-2">{question.content}</h3>
-                          
-                          {question.description && (
-                            <p className="text-gray-600 text-sm mb-3">{question.description}</p>
-                          )}
+                ) : (
+                  <div className="space-y-4">
+                    {filteredQuestions.map((question, index) => {
+                      const isSelected = examInfo.selectedQuestions.some(
+                        (q) => q.id === question.id
+                      );
+                      const selectedQuestion = examInfo.selectedQuestions.find(
+                        (q) => q.id === question.id
+                      );
 
-                          {/* Choices */}
-                          {question.choices && question.choices.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                              {question.choices.map((choice, choiceIndex) => (
-                                <div
-                                  key={choice.id}
-                                  className={`p-2 rounded border text-sm ${
-                                    choice.is_correct 
-                                      ? 'bg-green-50 border-green-200 text-green-800' 
-                                      : 'bg-gray-50 border-gray-200 text-gray-700'
-                                  }`}
-                                >
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                      {choice.is_correct && <span className="text-green-600">✓</span>}
-                                      <span className="font-medium">{String.fromCharCode(65 + choiceIndex)}.</span>
-                                      <span>{choice.content}</span>
-                                    </div>
-                                    {choice.explanation && (
-                                      <div className="text-xs text-gray-600 italic ml-6">
-                                        Giải thích: {choice.explanation}
+                      return (
+                        <div
+                          key={question.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                        >
+                          <div className="flex items-start gap-4">
+                            {/* checkbox */}
+                            <div className="flex-shrink-0">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleQuestionSelection(question)}
+                                className="mt-2 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                aria-label={`Chọn câu ${index + 1}`}
+                              />
+                            </div>
+
+                            {/* content */}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                <span className="font-semibold text-black">
+                                  Câu {(pagination.page - 1) * pagination.limit + index + 1}
+                                </span>
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                  {questionTypes[question.type] || "Khác"}
+                                </span>
+                                <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                                  {question.score} điểm gốc
+                                </span>
+                                {question.tags && (
+                                  <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-medium">
+                                    {question.tags}
+                                  </span>
+                                )}
+                              </div>
+
+                              <h3 className="text-lg font-medium text-black mb-2 truncate">
+                                {question.content}
+                              </h3>
+
+                              {question.description && (
+                                <p className="text-gray-600 text-sm mb-3">
+                                  {question.description}
+                                </p>
+                              )}
+
+                              {question.choices && question.choices.length > 0 && (
+                                <div className="grid sm:grid-cols-2 gap-2 mb-3">
+                                  {question.choices.map((choice, choiceIndex) => (
+                                    <div
+                                      key={choice.id}
+                                      className={`p-2 rounded border text-sm ${
+                                        choice.is_correct
+                                          ? "bg-green-50 border-green-200 text-green-800"
+                                          : "bg-gray-50 border-gray-200 text-gray-700"
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {choice.is_correct && (
+                                          <span className="text-green-600">✓</span>
+                                        )}
+                                        <span className="font-medium w-5">{String.fromCharCode(65 + choiceIndex)}.</span>
+                                        <span className="truncate">{choice.content}</span>
                                       </div>
-                                    )}
+                                      {choice.explanation && (
+                                        <div className="text-xs text-gray-600 italic mt-1">Giải thích: {choice.explanation}</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* meta row */}
+                              <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
+                                <div className="flex items-center gap-2">
+                                  {question.creator && (
+                                    <>
+                                      <span className="font-medium text-gray-700">{question.creator.username}</span>
+                                      <span>•</span>
+                                      <span>{new Date(question.created_at).toLocaleDateString("vi-VN")}</span>
+                                    </>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                  <button onClick={() => {}} className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition">
+                                    <ChatBubbleLeftIcon className="w-4 h-4" />
+                                    <span className="text-sm">{question.comment_count ?? 0}</span>
+                                  </button>
+                                  <div className="flex items-center gap-1 text-yellow-500">
+                                    <StarIcon className="w-4 h-4 text-yellow-400" />
+                                    <span className="text-sm text-gray-700">{question.average_rating != null ? Number(question.average_rating).toFixed(1) : "-"}</span>
                                   </div>
                                 </div>
-                              ))}
+                              </div>
                             </div>
-                          )}
-                        </div>
 
-                        {/* Score Input for Selected Questions */}
-                        {isSelected && (
-                          <div className="ml-4">
-                            <label className="block text-xs font-medium text-black mb-1">Điểm trong bài thi</label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="10"
-                              step="1"
-                              value={selectedQuestion?.score || question.score}
-                              onChange={(e) => updateQuestionScore(question.id, parseInt(e.target.value) || 0)}
-                              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
-                            />
+                            {/* score input */}
+                            {isSelected && (
+                              <div className="ml-4">
+                                <label className="block text-xs font-medium text-black mb-1">Điểm trong bài thi</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="10"
+                                  step="1"
+                                  value={selectedQuestion?.score || question.score}
+                                  onChange={(e) => updateQuestionScore(question.id, parseInt(e.target.value) || 0)}
+                                  className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
+                                />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -586,7 +714,7 @@ const CreateExam = () => {
                 >
                   Trước
                 </button>
-                
+
                 <div className="flex gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
@@ -599,15 +727,15 @@ const CreateExam = () => {
                     } else {
                       pageNum = pagination.page - 2 + i;
                     }
-                    
+
                     return (
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
                         className={`px-3 py-2 border rounded-lg transition ${
                           pageNum === pagination.page
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'border-gray-300 text-black bg-white hover:bg-gray-50'
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "border-gray-300 text-black bg-white hover:bg-gray-50"
                         }`}
                       >
                         {pageNum}
@@ -615,7 +743,7 @@ const CreateExam = () => {
                     );
                   })}
                 </div>
-                
+
                 <button
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === totalPages}
@@ -639,7 +767,7 @@ const CreateExam = () => {
               onClick={saveExam}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium shadow-md"
             >
-              {isEditMode ? 'Cập nhật đề thi' : 'Lưu đề thi'}
+              {isEditMode ? "Cập nhật đề thi" : "Lưu đề thi"}
             </button>
           </div>
         </div>

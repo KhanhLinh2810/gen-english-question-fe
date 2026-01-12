@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import SidebarMenu from '../components/SidebarMenu';
-import { getExamAttemptResult } from '../api/examAttemptApi';
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import SidebarMenu from "../components/SidebarMenu";
+import { getExamAttemptResult } from "../api/examAttemptApi";
 
 const ExamReview = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const attemptId = searchParams.get('attempt_id');
+  const attemptId = searchParams.get("attempt_id");
 
   const [examData, setExamData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,23 +15,24 @@ const ExamReview = () => {
   useEffect(() => {
     const loadReview = async () => {
       if (!attemptId) {
-        toast.error('Không tìm thấy bài làm');
-        navigate('/exam-bank');
+        toast.error("Không tìm thấy bài làm");
+        navigate("/exam-bank");
         return;
       }
 
       try {
         setLoading(true);
         const response = await getExamAttemptResult(parseInt(attemptId));
-        
-        if (response.code === 'SUCCESS') {
+
+        if (response.code === "SUCCESS") {
           setExamData(response.data);
         }
       } catch (error) {
-        console.error('Error loading exam review:', error);
-        const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tải bài làm';
+        console.error("Error loading exam review:", error);
+        const errorMessage =
+          error.response?.data?.message || "Có lỗi xảy ra khi tải bài làm";
         toast.error(errorMessage);
-        navigate('/exam-bank');
+        navigate("/exam-bank");
       } finally {
         setLoading(false);
       }
@@ -43,23 +44,23 @@ const ExamReview = () => {
   // Check if a question is answered correctly
   const isQuestionCorrect = (question) => {
     if (!question.choices || question.choices.length === 0) return false;
-    
+
     // Get selected choices (user's answers)
-    const selectedChoices = question.choices.filter(c => c.is_selected);
-    const correctChoices = question.choices.filter(c => c.is_correct);
-    
+    const selectedChoices = question.choices.filter((c) => c.is_selected);
+    const correctChoices = question.choices.filter((c) => c.is_correct);
+
     // Check if all selected are correct and all correct are selected
     if (selectedChoices.length !== correctChoices.length) return false;
-    
-    return selectedChoices.every(selected => 
-      correctChoices.some(correct => correct.id === selected.id)
+
+    return selectedChoices.every((selected) =>
+      correctChoices.some((correct) => correct.id === selected.id)
     );
   };
 
   // Get selected choice for a question
   const getSelectedChoice = (question) => {
     if (!question.choices) return null;
-    return question.choices.find(c => c.is_selected);
+    return question.choices.find((c) => c.is_selected);
   };
 
   if (loading) {
@@ -89,23 +90,33 @@ const ExamReview = () => {
   }
 
   // Sort questions by order
-  const sortedQuestions = [...examData.list_question].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const sortedQuestions = [...examData.list_question].sort(
+    (a, b) => (a.order || 0) - (b.order || 0)
+  );
 
   return (
     <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
       {/* Sidebar */}
-      <div className="w-96">
+      <div className="w-80">
         <SidebarMenu />
       </div>
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="bg-white rounded-2xl shadow-sm p-6" style={{ minHeight: 'calc(100vh - 32px)' }}>
+        <div
+          className="bg-white rounded-lg shadow-sm p-8"
+          style={{ minHeight: "calc(100vh - 32px)" }}
+        >
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Xem lại Bài làm</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-1">
+              Xem lại Bài làm
+            </h1>
             <p className="text-gray-600">
-              Đề thi: <span className="font-semibold text-gray-800">{examData.exam?.title || 'N/A'}</span>
+              Đề thi:{" "}
+              <span className="font-semibold text-gray-800">
+                {examData.exam?.title || "N/A"}
+              </span>
             </p>
           </div>
 
@@ -114,14 +125,14 @@ const ExamReview = () => {
             {sortedQuestions.map((question, index) => {
               const isCorrect = isQuestionCorrect(question);
               const selectedChoice = getSelectedChoice(question);
-              
+
               return (
                 <div
                   key={question.id}
                   className={`border-2 rounded-lg p-5 ${
                     isCorrect
-                      ? 'border-green-300 bg-green-50'
-                      : 'border-red-300 bg-red-50'
+                      ? "border-green-300 bg-green-50"
+                      : "border-red-300 bg-red-50"
                   }`}
                 >
                   {/* Question Header */}
@@ -149,55 +160,64 @@ const ExamReview = () => {
 
                   {/* Question Content */}
                   <div className="mb-4">
-                    <p className="text-gray-800 font-medium mb-2">{question.content}</p>
+                    <p className="text-gray-800 font-medium mb-2">
+                      {question.content}
+                    </p>
                     {question.description && (
-                      <p className="text-gray-600 text-sm italic">{question.description}</p>
+                      <p className="text-gray-600 text-sm italic">
+                        {question.description}
+                      </p>
                     )}
                   </div>
 
                   {/* Choices */}
                   <div className="space-y-2">
-                    {question.choices && question.choices.map((choice, choiceIndex) => {
-                      const choiceLabel = String.fromCharCode(65 + choiceIndex); // A, B, C, D
-                      const isSelected = choice.is_selected;
-                      const isCorrectChoice = choice.is_correct;
-                      
-                      let bgColor = 'bg-white';
-                      let borderColor = 'border-gray-300';
-                      let textColor = 'text-gray-800';
-                      
-                      if (isCorrectChoice) {
-                        bgColor = 'bg-green-100';
-                        borderColor = 'border-green-400';
-                        textColor = 'text-green-800';
-                      } else if (isSelected && !isCorrectChoice) {
-                        bgColor = 'bg-red-100';
-                        borderColor = 'border-red-400';
-                        textColor = 'text-red-800';
-                      }
-                      
-                      return (
-                        <div
-                          key={choice.id}
-                          className={`border-2 rounded-lg p-3 ${bgColor} ${borderColor} ${textColor}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold">{choiceLabel}.</span>
-                            <span>{choice.content}</span>
-                            {isCorrectChoice && (
-                              <span className="ml-auto text-green-600 font-semibold text-sm">
-                                ✓ Đáp án đúng
+                    {question.choices &&
+                      question.choices.map((choice, choiceIndex) => {
+                        const choiceLabel = String.fromCharCode(
+                          65 + choiceIndex
+                        ); // A, B, C, D
+                        const isSelected = choice.is_selected;
+                        const isCorrectChoice = choice.is_correct;
+
+                        let bgColor = "bg-white";
+                        let borderColor = "border-gray-300";
+                        let textColor = "text-gray-800";
+
+                        if (isCorrectChoice) {
+                          bgColor = "bg-green-100";
+                          borderColor = "border-green-400";
+                          textColor = "text-green-800";
+                        } else if (isSelected && !isCorrectChoice) {
+                          bgColor = "bg-red-100";
+                          borderColor = "border-red-400";
+                          textColor = "text-red-800";
+                        }
+
+                        return (
+                          <div
+                            key={choice.id}
+                            className={`border-2 rounded-lg p-3 ${bgColor} ${borderColor} ${textColor}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold">
+                                {choiceLabel}.
                               </span>
-                            )}
-                            {isSelected && !isCorrectChoice && (
-                              <span className="ml-auto text-red-600 font-semibold text-sm">
-                                ✗ Bạn đã chọn
-                              </span>
-                            )}
+                              <span>{choice.content}</span>
+                              {isCorrectChoice && (
+                                <span className="ml-auto text-green-600 font-semibold text-sm">
+                                  ✓ Đáp án đúng
+                                </span>
+                              )}
+                              {isSelected && !isCorrectChoice && (
+                                <span className="ml-auto text-red-600 font-semibold text-sm">
+                                  ✗ Bạn đã chọn
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
 
                   {/* Answer Status */}
@@ -227,4 +247,3 @@ const ExamReview = () => {
 };
 
 export default ExamReview;
-

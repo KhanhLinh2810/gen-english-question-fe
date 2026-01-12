@@ -11,6 +11,7 @@ import {
   AuthButton,
   AuthLink,
 } from "../components/auth/index.js";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -28,43 +29,42 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const newErrors = validateForm();
+    e.preventDefault();
+    const newErrors = validateForm();
 
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
-
-  setIsLoading(true);
-  setErrors({});
-
-  try {
-    const data = await login(username, password);
-
-    const accessToken = data?.data?.access_token;
-    if (!accessToken) {
-      throw new Error("Token không hợp lệ");
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
-    Cookies.set("access_token", accessToken, {
-      expires: 1, // token lưu 1 ngày
-      secure: true, // chỉ gửi qua HTTPS
-      sameSite: "Strict", 
-      path: "/",  // cookie dùng trên toàn site
-    });
+    setIsLoading(true);
+    setErrors({});
 
-    toast.success("Đăng nhập thành công!");
+    try {
+      const data = await login(username, password);
 
-    navigator("/");
-  } catch (err) {
-    console.error("Đăng nhập thất bại:", err);
-    toast.error(err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const accessToken = data?.data?.access_token;
+      if (!accessToken) {
+        throw new Error("Token không hợp lệ");
+      }
 
+      Cookies.set("access_token", accessToken, {
+        expires: 1, // token lưu 1 ngày
+        secure: true, // chỉ gửi qua HTTPS
+        sameSite: "Strict",
+        path: "/", // cookie dùng trên toàn site
+      });
+
+      toast.success("Đăng nhập thành công!");
+
+      navigator("/");
+    } catch (err) {
+      console.error("Đăng nhập thất bại:", err);
+      toast.error(err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <AuthLayout title="Đăng nhập">
@@ -103,12 +103,12 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-10.5 text-gray-500 hover:text-gray-700"
             >
               {showPassword ? (
-                <span className="text-lg">👁️</span>
+                <EyeSlashIcon className="w-5 h-5" />
               ) : (
-                <span className="text-lg">🙈</span>
+                <EyeIcon className="w-5 h-5" />
               )}
             </button>
           </div>

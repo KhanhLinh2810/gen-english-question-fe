@@ -10,6 +10,7 @@ import {
   updateAvatar,
 } from "../api/userApi.js";
 import { setUser, logout } from "./redux/userSlice.js";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Settings = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -233,22 +234,22 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
+     <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
       {/* Sidebar */}
-      <div className="w-96">
+      <div className="w-80">
         <SidebarMenu />
       </div>
 
       {/* Main Content */}
       <div className="flex-1">
         <div
-          className="bg-white rounded-2xl shadow-sm p-6"
+          className="bg-white rounded-lg shadow-sm p-8"
           style={{ minHeight: "calc(100vh - 32px)" }}
         >
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-black mb-1">Cài đặt</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-1">Cài đặt</h1>
             </div>
           </div>
 
@@ -270,9 +271,9 @@ const Settings = () => {
                   <div className="flex items-center gap-4">
                     <img
                       src={
-                        // previewAvatar || formData.avatar_url?.replace("http://localhost:3000", "") || "/default-avatar.png"
-                        previewAvatar || formData.avatar_url || "/default-avatar.png"
-
+                        previewAvatar ||
+                        formData.avatar_url ||
+                        "../../src/assets/default-avatar.png"
                       }
                       alt="avatar"
                       className="w-20 h-20 rounded-full object-cover border border-gray-300"
@@ -371,9 +372,9 @@ const Settings = () => {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
                       >
                         {showPasswords.old_password ? (
-                          <span className="text-lg">👁️</span>
+                          <EyeIcon className="w-5 h-5" />
                         ) : (
-                          <span className="text-lg">🙈</span>
+                          <EyeSlashIcon className="w-5 h-5" />
                         )}
                       </button>
                     </div>
@@ -402,9 +403,9 @@ const Settings = () => {
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
                         >
                           {showPasswords.new_password ? (
-                            <span className="text-lg">👁️</span>
+                            <EyeIcon className="w-5 h-5" />
                           ) : (
-                            <span className="text-lg">🙈</span>
+                            <EyeSlashIcon className="w-5 h-5" />
                           )}
                         </button>
                       </div>
@@ -432,9 +433,9 @@ const Settings = () => {
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
                         >
                           {showPasswords.confirmPassword ? (
-                            <span className="text-lg">👁️</span>
+                            <EyeIcon className="w-5 h-5" />
                           ) : (
-                            <span className="text-lg">🙈</span>
+                            <EyeSlashIcon className="w-5 h-5" />
                           )}
                         </button>
                       </div>
