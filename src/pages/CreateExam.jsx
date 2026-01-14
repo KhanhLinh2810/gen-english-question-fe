@@ -608,7 +608,9 @@ const CreateExam = () => {
                                     1}
                                 </span>
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                                  {QuestionTypes[question.type] || "Khác"}
+                                  {QuestionTypes[question.type]?.label ||
+                                    QuestionTypes[question.type] ||
+                                    "Khác"}{" "}
                                 </span>
                                 <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
                                   {question.score} điểm gốc
