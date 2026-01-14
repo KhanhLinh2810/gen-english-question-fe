@@ -24,6 +24,7 @@ const ManualQuestions = () => {
     },
   ]);
   const [loading, setLoading] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     title: "",
@@ -34,15 +35,33 @@ const ManualQuestions = () => {
   const [showExplanations, setShowExplanations] = useState({});
 
   const questionTypes = [
-    { value: 1, label: "Khác" },
-    { value: 2, label: "Từ vựng" },
+    // --- Nhóm câu hỏi đơn lẻ ---
+    { value: 1, label: "Phát âm" },
+    { value: 2, label: "Trọng âm" },
+    { value: 3, label: "Tìm từ đồng nghĩa" },
+    { value: 4, label: "Tìm từ trái nghĩa" },
+    { value: 5, label: "Tìm lỗi sai" },
+    { value: 6, label: "Điền từ vào chỗ trống" },
+    { value: 7, label: "Sắp xếp/Hoàn thành câu" },
+
+    // --- Nhóm câu hỏi đọc hiểu (Paragraph) ---
+    { value: 21, label: "Đọc hiểu: Câu hỏi chi tiết" },
+    { value: 22, label: "Đọc hiểu: Xác định ý chính" },
+    { value: 23, label: "Đọc hiểu: Từ vựng trong ngữ cảnh" },
+    { value: 24, label: "Đọc hiểu: Câu hỏi suy luận" },
+    { value: 25, label: "Đọc hiểu: Xác định mục đích" },
   ];
 
   const choiceCountOptions = [
-    { value: 2, label: "2 lựa chọn" },
-    { value: 3, label: "3 lựa chọn" },
-    { value: 4, label: "4 lựa chọn" },
-    { value: 5, label: "5 lựa chọn" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" },
+    { value: 6, label: "6" },
+    { value: 7, label: "7" },
+    { value: 8, label: "8" },
+    { value: 9, label: "9" },
+    { value: 10, label: "10" },
   ];
 
   // Add new question
@@ -150,19 +169,31 @@ const ManualQuestions = () => {
     );
   };
 
-  // Save questions to database
-  const saveQuestions = async () => {
-    const selectedQuestions = questions.filter((q) => q.selected);
-
+  const validateQuestions = (selectedQuestions) => {
     if (selectedQuestions.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một câu hỏi để lưu");
+      toast.error("Vui lòng nhập ít nhất một câu hỏi để lưu");
       return;
     }
 
     // Validate questions
+    let position_count = 1;
     for (const q of selectedQuestions) {
+      while (
+        q.id &&
+        position_count <= questions.length &&
+        q.id != questions[position_count - 1].id
+      ) {
+        position_count += 1;
+      }
+
+      const question_count =
+        position_count && position_count <= questions.length
+          ? `câu hỏi số ${position_count}`
+          : "câu hỏi";
+      position_count += 1;
+
       if (!q.question.trim()) {
-        toast.error("Vui lòng nhập nội dung câu hỏi");
+        toast.error("Vui lòng nhập nội dung " + question_count);
         return;
       }
 
@@ -170,37 +201,71 @@ const ManualQuestions = () => {
       const hasAllChoices = q.choices.every((choice) => choice.text.trim());
 
       if (!hasCorrectAnswer) {
-        toast.error("Vui lòng chọn đáp án đúng cho câu hỏi");
+        toast.error("Vui lòng chọn đáp án đúng cho " + question_count);
         return;
       }
 
       if (!hasAllChoices) {
-        toast.error("Vui lòng điền đầy đủ các lựa chọn");
+        toast.error("Vui lòng điền đầy đủ các lựa chọn của" + question_count);
         return;
       }
     }
+  };
+
+  const transform_data_to_match_backend_API = (selectedQuestions) => {
+    return {
+      questions: selectedQuestions.map((q) => ({
+        content: q.question,
+        description: q.description || "",
+        score: q.points,
+        type: q.type,
+        tags: q.tags || "",
+        by_ai: false,
+        choices: q.choices.map((choice) => ({
+          content: choice.text,
+          is_correct: choice.isCorrect,
+          explanation: choice.explanation || "",
+        })),
+      })),
+    };
+  };
+
+  // Save all questions to database
+  const saveAllQuestions = async () => {
+    const selectedQuestions = questions;
+    validateQuestions(selectedQuestions);
+
+    try {
+      setLoadingAll(true);
+      const response = await createQuestions(
+        transform_data_to_match_backend_API(selectedQuestions)
+      );
+
+      if (response.code === "SUCCESS") {
+        toast.success("Lưu câu hỏi thành công!");
+        // Remove saved questions from list
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.error("Error saving questions:", error);
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra khi lưu câu hỏi";
+      toast.error(errorMessage);
+    } finally {
+      setLoadingAll(false);
+    }
+  };
+
+  // Save questions to database
+  const saveQuestions = async () => {
+    const selectedQuestions = questions.filter((q) => q.selected);
+    validateQuestions(selectedQuestions);
 
     try {
       setLoading(true);
-
-      // Transform data to match backend API
-      const questionsData = {
-        questions: selectedQuestions.map((q) => ({
-          content: q.question,
-          description: q.description || "",
-          score: q.points,
-          type: q.type,
-          tags: q.tags || "",
-          by_ai: false,
-          choices: q.choices.map((choice) => ({
-            content: choice.text,
-            is_correct: choice.isCorrect,
-            explanation: choice.explanation || "",
-          })),
-        })),
-      };
-
-      const response = await createQuestions(questionsData);
+      const response = await createQuestions(
+        transform_data_to_match_backend_API(selectedQuestions)
+      );
 
       if (response.code === "SUCCESS") {
         toast.success("Lưu câu hỏi thành công!");
@@ -338,7 +403,7 @@ const ManualQuestions = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      Kiểu
+                      Kiểu câu hỏi
                     </label>
                     <select
                       value={question.type}
@@ -434,7 +499,7 @@ const ManualQuestions = () => {
                 {/* Choices */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Các lựa chọn
+                    Số lượng lựa chọn
                   </label>
                   <div className="space-y-2">
                     {question.choices.map((choice) => {
@@ -525,6 +590,13 @@ const ManualQuestions = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
+            <button
+              onClick={saveAllQuestions}
+              disabled={loadingAll}
+              className="bg-cyan-500 text-white px-5 py-2.5 rounded-lg hover:bg-cyan-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingAll ? "Đang lưu..." : "Lưu tất cả vào ngân hàng câu hỏi"}
+            </button>
             <button
               onClick={saveQuestions}
               disabled={loading}

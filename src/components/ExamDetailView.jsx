@@ -56,7 +56,7 @@ const ExamDetailView = ({ exam, onBack }) => {
               <UserCircleIcon className="text-blue-600 text-xl w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Người tạo đề thi:</p>
+              <p className="text-xs text-gray-500 mb-1">Tác giả:</p>
               <p className="font-semibold text-gray-800">
                 {exam.creator?.username || "Hệ thống"}
               </p>
@@ -95,16 +95,14 @@ const ExamDetailView = ({ exam, onBack }) => {
 
       {/* Time and Limit Section */}
       <div className="bg-gray-50 rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Thời gian và Giới hạn
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Giới hạn</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
               <span className="text-green-600 text-sm">●</span>
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Bắt đầu sớm nhất:</p>
+              <p className="text-xs text-gray-500 mb-1">Thời gian mở đề:</p>
               <p className="font-medium text-gray-800">
                 {formatDate(exam.earliest_start_time)}
               </p>
@@ -116,7 +114,7 @@ const ExamDetailView = ({ exam, onBack }) => {
               <span className="text-red-600 text-sm">●</span>
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Bắt đầu muộn nhất:</p>
+              <p className="text-xs text-gray-500 mb-1">Thời gian đóng đề:</p>
               <p className="font-medium text-gray-800">
                 {formatDate(exam.lastest_start_time)}
               </p>
@@ -128,7 +126,7 @@ const ExamDetailView = ({ exam, onBack }) => {
               <UsersIcon className="text-blue-600 text-sm w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Giới hạn thí sinh:</p>
+              <p className="text-xs text-gray-500 mb-1">Số lượng thi tốt đa:</p>
               <p className="font-medium text-gray-800">
                 {exam.max_attempt
                   ? `${exam.max_attempt} lượt`
@@ -149,7 +147,7 @@ const ExamDetailView = ({ exam, onBack }) => {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-semibold text-yellow-800 mb-1">
-                  CHÚ THÍCH TỪ NGƯỜI TẠO ĐỀ:
+                  CHÚ THÍCH:
                 </h3>
                 <p className="text-sm text-yellow-700">{exam.note}</p>
               </div>
