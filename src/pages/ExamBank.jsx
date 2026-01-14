@@ -301,7 +301,7 @@ const ExamBank = () => {
                       onChange={(e) =>
                         handleFilterChange("duration_from", e.target.value)
                       }
-                      placeholder="Từ (phút)..."
+                      placeholder="Từ..."
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                     />
@@ -311,7 +311,7 @@ const ExamBank = () => {
                       onChange={(e) =>
                         handleFilterChange("duration_to", e.target.value)
                       }
-                      placeholder="Đến (phút)..."
+                      placeholder="Đến..."
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                     />

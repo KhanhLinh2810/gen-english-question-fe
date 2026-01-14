@@ -5,6 +5,7 @@ import SidebarMenu from "../components/SidebarMenu";
 import { ChatBubbleLeftIcon, StarIcon } from "@heroicons/react/24/outline";
 import { getQuestions } from "../api/questionApi.js";
 import { createExam, getExamDetail, updateExam } from "../api/examApi.js";
+import { QuestionTypes } from "../enums/question.js";
 
 const CreateExam = () => {
   const [searchParams] = useSearchParams();
@@ -33,11 +34,6 @@ const CreateExam = () => {
     limit: 10,
     total: 0,
   });
-
-  const questionTypes = {
-    1: "Khác",
-    2: "Từ vựng",
-  };
 
   // Load exam data for editing
   const loadExamForEdit = async (examId) => {
@@ -594,7 +590,9 @@ const CreateExam = () => {
                               <input
                                 type="checkbox"
                                 checked={isSelected}
-                                onChange={() => toggleQuestionSelection(question)}
+                                onChange={() =>
+                                  toggleQuestionSelection(question)
+                                }
                                 className="mt-2 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                                 aria-label={`Chọn câu ${index + 1}`}
                               />
@@ -604,10 +602,13 @@ const CreateExam = () => {
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-1 flex-wrap">
                                 <span className="font-semibold text-black">
-                                  Câu {(pagination.page - 1) * pagination.limit + index + 1}
+                                  Câu{" "}
+                                  {(pagination.page - 1) * pagination.limit +
+                                    index +
+                                    1}
                                 </span>
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                                  {questionTypes[question.type] || "Khác"}
+                                  {QuestionTypes[question.type] || "Khác"}
                                 </span>
                                 <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
                                   {question.score} điểm gốc
@@ -629,52 +630,83 @@ const CreateExam = () => {
                                 </p>
                               )}
 
-                              {question.choices && question.choices.length > 0 && (
-                                <div className="grid sm:grid-cols-2 gap-2 mb-3">
-                                  {question.choices.map((choice, choiceIndex) => (
-                                    <div
-                                      key={choice.id}
-                                      className={`p-2 rounded border text-sm ${
-                                        choice.is_correct
-                                          ? "bg-green-50 border-green-200 text-green-800"
-                                          : "bg-gray-50 border-gray-200 text-gray-700"
-                                      }`}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        {choice.is_correct && (
-                                          <span className="text-green-600">✓</span>
-                                        )}
-                                        <span className="font-medium w-5">{String.fromCharCode(65 + choiceIndex)}.</span>
-                                        <span className="truncate">{choice.content}</span>
-                                      </div>
-                                      {choice.explanation && (
-                                        <div className="text-xs text-gray-600 italic mt-1">Giải thích: {choice.explanation}</div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              {question.choices &&
+                                question.choices.length > 0 && (
+                                  <div className="grid sm:grid-cols-2 gap-2 mb-3">
+                                    {question.choices.map(
+                                      (choice, choiceIndex) => (
+                                        <div
+                                          key={choice.id}
+                                          className={`p-2 rounded border text-sm ${
+                                            choice.is_correct
+                                              ? "bg-green-50 border-green-200 text-green-800"
+                                              : "bg-gray-50 border-gray-200 text-gray-700"
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            {choice.is_correct && (
+                                              <span className="text-green-600">
+                                                ✓
+                                              </span>
+                                            )}
+                                            <span className="font-medium w-5">
+                                              {String.fromCharCode(
+                                                65 + choiceIndex
+                                              )}
+                                              .
+                                            </span>
+                                            <span className="truncate">
+                                              {choice.content}
+                                            </span>
+                                          </div>
+                                          {choice.explanation && (
+                                            <div className="text-xs text-gray-600 italic mt-1">
+                                              Giải thích: {choice.explanation}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
 
                               {/* meta row */}
                               <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
                                 <div className="flex items-center gap-2">
                                   {question.creator && (
                                     <>
-                                      <span className="font-medium text-gray-700">{question.creator.username}</span>
+                                      <span className="font-medium text-gray-700">
+                                        {question.creator.username}
+                                      </span>
                                       <span>•</span>
-                                      <span>{new Date(question.created_at).toLocaleDateString("vi-VN")}</span>
+                                      <span>
+                                        {new Date(
+                                          question.created_at
+                                        ).toLocaleDateString("vi-VN")}
+                                      </span>
                                     </>
                                   )}
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                  <button onClick={() => {}} className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition">
+                                  <button
+                                    onClick={() => {}}
+                                    className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition"
+                                  >
                                     <ChatBubbleLeftIcon className="w-4 h-4" />
-                                    <span className="text-sm">{question.comment_count ?? 0}</span>
+                                    <span className="text-sm">
+                                      {question.comment_count ?? 0}
+                                    </span>
                                   </button>
                                   <div className="flex items-center gap-1 text-yellow-500">
                                     <StarIcon className="w-4 h-4 text-yellow-400" />
-                                    <span className="text-sm text-gray-700">{question.average_rating != null ? Number(question.average_rating).toFixed(1) : "-"}</span>
+                                    <span className="text-sm text-gray-700">
+                                      {question.average_rating != null
+                                        ? Number(
+                                            question.average_rating
+                                          ).toFixed(1)
+                                        : "-"}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -683,14 +715,23 @@ const CreateExam = () => {
                             {/* score input */}
                             {isSelected && (
                               <div className="ml-4">
-                                <label className="block text-xs font-medium text-black mb-1">Điểm trong bài thi</label>
+                                <label className="block text-xs font-medium text-black mb-1">
+                                  Điểm trong bài thi
+                                </label>
                                 <input
                                   type="number"
                                   min="0"
                                   max="10"
                                   step="1"
-                                  value={selectedQuestion?.score || question.score}
-                                  onChange={(e) => updateQuestionScore(question.id, parseInt(e.target.value) || 0)}
+                                  value={
+                                    selectedQuestion?.score || question.score
+                                  }
+                                  onChange={(e) =>
+                                    updateQuestionScore(
+                                      question.id,
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
                                   className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
                                 />
                               </div>

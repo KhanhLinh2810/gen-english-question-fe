@@ -1,4 +1,5 @@
-import React from 'react';
+import React from "react";
+import { QuestionTypes } from "../enums/question";
 
 const ExamDetailModal = ({ isOpen, onClose, exam }) => {
   if (!isOpen || !exam) return null;
@@ -10,17 +11,12 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Không giới hạn';
-    return new Date(dateString).toLocaleString('vi-VN');
-  };
-
-  const questionTypes = {
-    1: 'Khác',
-    2: 'Từ vựng'
+    if (!dateString) return "Không giới hạn";
+    return new Date(dateString).toLocaleString("vi-VN");
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-white bg-opacity-20 backdrop-blur-md flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
@@ -32,7 +28,7 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
               <h2 className="text-2xl font-bold">{exam.title}</h2>
               <p className="text-blue-100 text-sm mt-1">Chi tiết đề thi</p>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="text-white hover:text-blue-200 transition text-3xl leading-none"
             >
@@ -46,49 +42,69 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
           {/* Exam Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Thông tin chung</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Thông tin chung
+              </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Thời gian:</span>
-                  <span className="font-medium text-gray-800">{exam.duration} phút</span>
+                  <span className="font-medium text-gray-800">
+                    {exam.duration} phút
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Số câu hỏi:</span>
-                  <span className="font-medium text-gray-800">{exam.list_question?.length || 0} câu</span>
+                  <span className="font-medium text-gray-800">
+                    {exam.list_question?.length || 0} câu
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Lượt thi tối đa:</span>
-                  <span className="font-medium text-gray-800">{exam.max_attempt || 'Không giới hạn'}</span>
+                  <span className="font-medium text-gray-800">
+                    {exam.max_attempt || "Không giới hạn"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tổng điểm:</span>
                   <span className="font-medium text-gray-800">
-                    {exam.list_question?.reduce((total, q) => total + (q.score_in_exam || q.score || 0), 0) || 0} điểm
+                    {exam.list_question?.reduce(
+                      (total, q) => total + (q.score_in_exam || q.score || 0),
+                      0
+                    ) || 0}{" "}
+                    điểm
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Trạng thái:</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    exam.is_public !== false 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {exam.is_public !== false ? 'Công khai' : 'Riêng tư'}
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      exam.is_public !== false
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {exam.is_public !== false ? "Công khai" : "Riêng tư"}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Thời gian thi</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Thời gian thi
+              </h3>
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="text-gray-600">Mở đề:</span>
-                  <p className="font-medium text-gray-800">{formatDate(exam.earliest_start_time)}</p>
+                  <p className="font-medium text-gray-800">
+                    {formatDate(exam.earliest_start_time)}
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-600">Đóng đề:</span>
-                  <p className="font-medium text-gray-800">{formatDate(exam.lastest_start_time)}</p>
+                  <p className="font-medium text-gray-800">
+                    {formatDate(exam.lastest_start_time)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -97,7 +113,9 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
           {/* Description */}
           {exam.note && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Mô tả</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Mô tả
+              </h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-gray-700">{exam.note}</p>
               </div>
@@ -112,44 +130,59 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
             <div className="space-y-4">
               {exam.list_question && exam.list_question.length > 0 ? (
                 exam.list_question.map((question, index) => (
-                  <div key={question.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div
+                    key={question.id}
+                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">
                           Câu {index + 1}
                         </span>
                         <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
-                          {questionTypes[question.type] || 'Khác'}
+                          {QuestionTypes[question.type] || "Khác"}
                         </span>
                         <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-medium">
                           {question.score_in_exam || question.score || 0} điểm
                         </span>
                       </div>
                     </div>
-                    
-                    <h4 className="font-medium text-gray-800 mb-2">{question.content}</h4>
-                    
+
+                    <h4 className="font-medium text-gray-800 mb-2">
+                      {question.content}
+                    </h4>
+
                     {question.description && (
-                      <p className="text-gray-600 text-sm mb-3 italic">{question.description}</p>
+                      <p className="text-gray-600 text-sm mb-3 italic">
+                        {question.description}
+                      </p>
                     )}
 
                     {/* Choices */}
                     {question.choices && question.choices.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700">Các lựa chọn:</p>
+                        <p className="text-sm font-medium text-gray-700">
+                          Các lựa chọn:
+                        </p>
                         <div className="grid grid-cols-1 gap-2">
                           {question.choices.map((choice, choiceIndex) => (
                             <div
                               key={choice.id}
                               className={`p-2 rounded text-sm border ${
                                 choice.is_correct
-                                  ? 'bg-green-50 border-green-200 text-green-800'
-                                  : 'bg-white border-gray-200 text-gray-700'
+                                  ? "bg-green-50 border-green-200 text-green-800"
+                                  : "bg-white border-gray-200 text-gray-700"
                               }`}
                             >
                               <div className="flex items-center gap-2">
-                                {choice.is_correct && <span className="text-green-600 font-bold">✓</span>}
-                                <span className="font-medium">{String.fromCharCode(65 + choiceIndex)}.</span>
+                                {choice.is_correct && (
+                                  <span className="text-green-600 font-bold">
+                                    ✓
+                                  </span>
+                                )}
+                                <span className="font-medium">
+                                  {String.fromCharCode(65 + choiceIndex)}.
+                                </span>
                                 <span>{choice.content}</span>
                               </div>
                               {choice.explanation && (
@@ -177,14 +210,20 @@ const ExamDetailModal = ({ isOpen, onClose, exam }) => {
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <img
-                  src={exam.creator.avatar_url || 'https://via.placeholder.com/32'}
+                  src={
+                    exam.creator.avatar_url || "https://via.placeholder.com/32"
+                  }
                   alt="Creator Avatar"
                   className="w-8 h-8 rounded-full"
                 />
                 <div>
-                  <span className="font-medium">Tạo bởi: {exam.creator.username}</span>
+                  <span className="font-medium">
+                    Tạo bởi: {exam.creator.username}
+                  </span>
                   <span className="mx-2">•</span>
-                  <span>{new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
+                  <span>
+                    {new Date(exam.created_at).toLocaleDateString("vi-VN")}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { updateQuestion } from "../api/questionApi";
-
-const questionTypes = [
-  { value: 1, label: "Khác" },
-  { value: 2, label: "Từ vựng" },
-];
-
-const choiceCountOptions = [
-  { value: 2, label: "2 lựa chọn" },
-  { value: 3, label: "3 lựa chọn" },
-  { value: 4, label: "4 lựa chọn" },
-  { value: 5, label: "5 lựa chọn" },
-];
+import { ChoiceCountOptions, QuestionTypes } from "../enums/question";
 
 const EditQuestionView = ({ question, onBack, onSaveSuccess }) => {
   const [formData, setFormData] = useState(null);
@@ -206,7 +195,7 @@ const EditQuestionView = ({ question, onBack, onSaveSuccess }) => {
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
             >
-              {questionTypes.map((type) => (
+              {QuestionTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>
@@ -225,7 +214,7 @@ const EditQuestionView = ({ question, onBack, onSaveSuccess }) => {
               onChange={(e) => updateChoiceCount(parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
             >
-              {choiceCountOptions.map((option) => (
+              {ChoiceCountOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

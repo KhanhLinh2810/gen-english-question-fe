@@ -4,6 +4,7 @@ import SidebarMenu from "../components/SidebarMenu";
 import ConfirmModal from "../components/ConfirmModal";
 import { createQuestions } from "../api/questionApi.js";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { ChoiceCountOptions, QuestionTypes } from "../enums/question.js";
 
 const ManualQuestions = () => {
   const [questions, setQuestions] = useState([
@@ -33,36 +34,6 @@ const ManualQuestions = () => {
     type: "default",
   });
   const [showExplanations, setShowExplanations] = useState({});
-
-  const questionTypes = [
-    // --- Nhóm câu hỏi đơn lẻ ---
-    { value: 1, label: "Phát âm" },
-    { value: 2, label: "Trọng âm" },
-    { value: 3, label: "Tìm từ đồng nghĩa" },
-    { value: 4, label: "Tìm từ trái nghĩa" },
-    { value: 5, label: "Tìm lỗi sai" },
-    { value: 6, label: "Điền từ vào chỗ trống" },
-    { value: 7, label: "Sắp xếp/Hoàn thành câu" },
-
-    // --- Nhóm câu hỏi đọc hiểu (Paragraph) ---
-    { value: 21, label: "Đọc hiểu: Câu hỏi chi tiết" },
-    { value: 22, label: "Đọc hiểu: Xác định ý chính" },
-    { value: 23, label: "Đọc hiểu: Từ vựng trong ngữ cảnh" },
-    { value: 24, label: "Đọc hiểu: Câu hỏi suy luận" },
-    { value: 25, label: "Đọc hiểu: Xác định mục đích" },
-  ];
-
-  const choiceCountOptions = [
-    { value: 2, label: "2" },
-    { value: 3, label: "3" },
-    { value: 4, label: "4" },
-    { value: 5, label: "5" },
-    { value: 6, label: "6" },
-    { value: 7, label: "7" },
-    { value: 8, label: "8" },
-    { value: 9, label: "9" },
-    { value: 10, label: "10" },
-  ];
 
   // Add new question
   const addQuestion = () => {
@@ -416,7 +387,7 @@ const ManualQuestions = () => {
                       }
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D3E83] text-slate-800 font-medium hover:shadow-sm transition duration-150"
                     >
-                      {questionTypes.map((type) => (
+                      {QuestionTypes.map((type) => (
                         <option key={type.value} value={type.value}>
                           {type.label}
                         </option>
@@ -434,7 +405,7 @@ const ManualQuestions = () => {
                       }
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D3E83] text-slate-800 font-medium hover:shadow-sm transition duration-150"
                     >
-                      {choiceCountOptions.map((option) => (
+                      {ChoiceCountOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
