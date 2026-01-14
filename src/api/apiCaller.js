@@ -82,9 +82,7 @@ export const register = async (payload) => {
 export const logOut = async () => {
   try {
     const response = await apiCaller.post("/auth/logout");
-    if (response.status === 200)
-    Cookies.remove("access_token");
-    return response.data;
+    if (response.status === 200) return response.data;
   } catch (error) {
     console.error("Lỗi đăng xuất:", error);
     throw error.response?.data || { message: "Lỗi kết nối server" };

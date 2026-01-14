@@ -16,6 +16,7 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import Cookies from "js-cookie";
 
 const SidebarMenu = () => {
   const dispatch = useDispatch();
@@ -81,6 +82,7 @@ const SidebarMenu = () => {
   const handleLogout = () => {
     try {
       logOut();
+      Cookies.remove("access_token", { path: "/" });
       toast.success("Đăng xuất thành công");
       setTimeout(() => {
         window.location.href = "/login";
