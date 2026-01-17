@@ -120,12 +120,17 @@ const TakeExam = () => {
         toast.success("Nộp bài thành công!");
 
         // Navigate immediately to result page and replace history so user can't go back to takeExam
-        navigate(`/exam-result?attempt_id=${attemptIdRef.current}`, {
-          replace: true,
-        });
+        if (response.code === "SUCCESS") {
+          navigate(`/exam-result?attempt_id=${attemptIdRef.current}`, {
+            replace: true,
+          });
+          return;
+        }
         return;
       }
     } catch (error) {
+      console.log("error");
+
       setIsSubmitted(false);
       autoSubmittedRef.current = false; // giải khoá nếu submit FAILED
 
@@ -167,14 +172,14 @@ const TakeExam = () => {
     return () => clearInterval(timer);
   }, [timeRemaining, examAttempt, isSubmitted]);
 
-  useEffect(() => {
-    if (isSubmitted && attemptIdRef.current) {
-      // replace so user cannot go back to the takeExam page
-      navigate(`/exam-result?attempt_id=${attemptIdRef.current}`, {
-        replace: true,
-      });
-    }
-  }, [isSubmitted, navigate]);
+  // useEffect(() => {
+  //   if (isSubmitted && attemptIdRef.current) {
+  //     // replace so user cannot go back to the takeExam page
+  //     navigate(`/exam-result?attempt_id=${attemptIdRef.current}`, {
+  //       replace: true,
+  //     });
+  //   }
+  // }, [isSubmitted, navigate]);
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60);

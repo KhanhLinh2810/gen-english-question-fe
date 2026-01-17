@@ -277,7 +277,7 @@ const QuestionsBank = () => {
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-semibold text-black mb-2">
-                    Tìm kiếm
+                    Tìm kiếm câu hỏi
                   </label>
                   <div className="relative">
                     <input

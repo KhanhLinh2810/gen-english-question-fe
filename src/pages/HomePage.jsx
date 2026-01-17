@@ -45,16 +45,13 @@ const HomePage = () => {
             id: attempt.id,
             exam_id: attempt.exam_id,
             name: attempt.exam?.title || "Đề thi không xác định",
-            date: attempt.finished_at
-              ? new Date(attempt.finished_at).toLocaleDateString("vi-VN")
-              : new Date(attempt.started_at).toLocaleDateString("vi-VN"),
+            started_at: new Date(attempt.started_at).toLocaleString("vi-VN"),
+            finished_at: new Date(attempt.finished_at).toLocaleString("vi-VN"),
             score:
-              attempt.finished_at &&
-              attempt.score !== null &&
-              attempt.score !== undefined
-                ? `${attempt.score.toFixed(1)}${
+              attempt.finished_at && attempt.score != null
+                ? `${Number(attempt.score).toFixed(1)}${
                     attempt.total_question
-                      ? `/${attempt.exam?.max_score.toFixed(1) ?? attempt.total_question}`
+                      ? `/${Number(attempt.exam?.max_score ?? attempt.total_question).toFixed(1)}`
                       : ""
                   }`
                 : "-",
@@ -225,7 +222,10 @@ const HomePage = () => {
                         Tên bài thi
                       </th>
                       <th className="px-4 py-3 text-left text-gray-700 font-medium">
-                        Ngày thi
+                        Bắt đầu
+                      </th>
+                      <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                        Kết thúc
                       </th>
                       <th className="px-4 py-3 text-left text-gray-700 font-medium">
                         Điểm số
@@ -242,7 +242,12 @@ const HomePage = () => {
                     {recentExams.map((exam) => (
                       <tr key={exam.id} className="border-b hover:bg-gray-50">
                         <td className="px-4 py-3 text-gray-800">{exam.name}</td>
-                        <td className="px-4 py-3 text-gray-600">{exam.date}</td>
+                        <td className="px-4 py-3 text-gray-600">
+                          {exam.started_at}
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">
+                          {exam.finished_at}
+                        </td>
                         <td className="px-4 py-3 text-gray-600">
                           {exam.score}
                         </td>
@@ -280,46 +285,72 @@ const HomePage = () => {
           </div>
 
           {/* Suggested Exams Section */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Đề thi gợi ý
-            </h2>
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
+                Đề thi của bạn
+              </h2>
+              <button
+                onClick={() => navigate("/exam-bank")}
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                Xem tất cả
+              </button>
+            </div>
+
             {loading ? (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
-                      <div className="h-2 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div
+                    key={i}
+                    className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm"
+                  >
+                    <div className="animate-pulse flex flex-col gap-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                      <div className="flex justify-between mt-2">
+                        <div className="h-6 bg-gray-100 rounded w-16"></div>
+                        <div className="h-6 bg-gray-100 rounded w-16"></div>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : suggestedExams.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-600">
-                Chưa có đề thi nào
+              <div className="bg-gray-50 rounded-xl p-8 text-center border-2 border-dashed border-gray-200">
+                <p className="text-gray-500">
+                  Chưa có đề thi nào trong danh sách của bạn
+                </p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {suggestedExams.map((exam) => (
                   <div
                     key={exam.id}
-                    onClick={() => navigate(`/exam-bank`)}
-                    className="bg-white rounded-lg shadow-sm p-4 hover:shadow transition cursor-pointer"
+                    onClick={() =>
+                      navigate(`/exam-bank`, { state: { selectedExam: exam } })
+                    }
+                    className="group relative bg-white border border-gray-100 rounded-xl p-5 
+                     hover:border-blue-500 hover:shadow-md transition-all duration-300 
+                     cursor-pointer flex flex-col justify-between"
                   >
-                    <h3 className="text-sm font-medium text-gray-800 mb-3">
-                      {exam.name}
-                    </h3>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${exam.progress}%` }}
-                      ></div>
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          <BookOpenIcon className="h-5 w-5" />
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 line-clamp-2 mb-4">
+                        {exam.name}
+                      </h3>
                     </div>
-                    <p className="text-xs text-gray-600 mt-2">
-                      {exam.progress}% hoàn thành
-                    </p>
+
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+                      <span className="text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform flex items-center">
+                        Làm bài ngay →
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

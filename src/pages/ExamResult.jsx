@@ -140,9 +140,12 @@ const ExamResult = () => {
               <p className="text-gray-600 text-lg">
                 Chúc mừng! Bạn đã hoàn thành bài thi
               </p>
-              <p className="text-gray-800 font-semibold text-xl">
-                "{examResult.exam?.title || "Đề thi"}"
-              </p>
+              <div className="inline-block px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+                <span className="text-blue-700 text-sm italic">
+                  Lưu ý: Kết quả chi tiết của bạn sẽ hiển thị sau khi bài thi
+                  kết thúc.
+                </span>
+              </div>
             </div>
           </div>
 

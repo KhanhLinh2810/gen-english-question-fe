@@ -28,7 +28,7 @@ const CreateExam = () => {
   const [filters, setFilters] = useState({
     search: "",
     selectedFilter: "all", // all, selected, unselected
-    is_current_user_only: false,
+    is_current_user_only: true,
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -510,7 +510,7 @@ const CreateExam = () => {
 
             {/* Search and Filters */}
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-semibold text-black mb-2">
                     Tìm kiếm câu hỏi
@@ -521,10 +521,11 @@ const CreateExam = () => {
                     onChange={(e) =>
                       handleFilterChange("search", e.target.value)
                     }
-                    placeholder="Nhập nội dung câu hỏi, đáp án hoặc tags để tìm kiếm..."
+                    placeholder="Nhập nội dung câu hỏi, đáp án hoặc tags..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-black mb-2">
                     Lọc theo trạng thái
@@ -541,6 +542,7 @@ const CreateExam = () => {
                     <option value="unselected">Chưa chọn</option>
                   </select>
                 </div>
+
                 <div className="flex items-end gap-2">
                   <button
                     onClick={selectAllVisible}
@@ -557,12 +559,12 @@ const CreateExam = () => {
                 </div>
               </div>
 
-              {/* <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="myQuestions"
-                    checked={filters.is_current_user_only}
+                    checked={filters.is_current_user_only ?? false}
                     onChange={(e) =>
                       handleFilterChange(
                         "is_current_user_only",
@@ -573,7 +575,7 @@ const CreateExam = () => {
                   />
                   <label
                     htmlFor="myQuestions"
-                    className="text-sm font-medium text-black"
+                    className="text-sm font-medium text-black whitespace-nowrap"
                   >
                     Chỉ hiển thị câu hỏi của tôi
                   </label>
@@ -595,7 +597,7 @@ const CreateExam = () => {
                     <option value={20}>20 câu hỏi/trang</option>
                   </select>
                 </div>
-              </div> */}
+              </div>
             </div>
 
             {/* Questions List */}
