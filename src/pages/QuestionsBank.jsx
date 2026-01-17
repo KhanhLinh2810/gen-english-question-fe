@@ -28,7 +28,7 @@ const QuestionsBank = () => {
   });
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 5, // Changed from 10 to 5
+    limit: 10, // Changed from 10 to 5
     total: 0,
   });
   const [confirmModal, setConfirmModal] = useState({
@@ -171,7 +171,7 @@ const QuestionsBank = () => {
       // Set new timeout for auto search
       const newTimeout = setTimeout(() => {
         loadQuestions(1);
-      }, 500); // 500ms delay
+      }, 200); // 200ms delay
 
       setSearchTimeout(newTimeout);
     }
@@ -287,7 +287,7 @@ const QuestionsBank = () => {
                         handleFilterChange("search", e.target.value)
                       }
                       onKeyPress={(e) => e.key === "Enter" && applyFilters()}
-                      placeholder="Nhập để tìm kiếm tự động theo nội dung hoặc tags..."
+                      placeholder="Nhập nội dung câu hỏi, đáp án hoặc tags để tìm kiếm..."
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                     />
                     {loading && (
@@ -322,7 +322,7 @@ const QuestionsBank = () => {
                     onChange={(e) =>
                       handleFilterChange(
                         "is_current_user_only",
-                        e.target.checked
+                        e.target.checked,
                       )
                     }
                     className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
@@ -490,7 +490,7 @@ const QuestionsBank = () => {
                           <span>•</span>
                           <span>
                             {new Date(question.created_at).toLocaleDateString(
-                              "vi-VN"
+                              "vi-VN",
                             )}
                           </span>
                         </div>

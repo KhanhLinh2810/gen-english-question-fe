@@ -9,6 +9,8 @@ import {
   BookOpenIcon,
   ChartBarIcon,
   MagnifyingGlassIcon,
+  PencilIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 
 const HomePage = () => {
@@ -51,12 +53,14 @@ const HomePage = () => {
               attempt.score !== null &&
               attempt.score !== undefined
                 ? `${attempt.score.toFixed(1)}${
-                    attempt.total_question ? `/${attempt.exam?.max_score.toFixed(1) ?? attempt.total_question }` : ""
+                    attempt.total_question
+                      ? `/${attempt.exam?.max_score.toFixed(1) ?? attempt.total_question}`
+                      : ""
                   }`
                 : "-",
             status: attempt.finished_at ? "Hoàn thành" : "Đang làm",
             finished: !!attempt.finished_at,
-          }))
+          })),
         );
       }
 
@@ -76,7 +80,7 @@ const HomePage = () => {
             id: exam.id,
             name: exam.title || "Đề thi không xác định",
             progress: 0, // Can calculate based on attempts if needed
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -122,36 +126,55 @@ const HomePage = () => {
           {/* Features Grid - 2x2 layout */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            {/* Tạo bài thi */}
+            {/* Tạo đề thi */}
             <div
               onClick={() => navigate("/CreateExam")}
               className={`group cursor-pointer p-6 rounded-xl min-h-[112px]
-      bg-gradient-to-br from-[#2D3E83] to-[#1E40AF]
-      text-white
-      border border-white/10
-      shadow-md
-      transition-all duration-200
-      hover:-translate-y-0.5 hover:shadow-lg
-    `}
+                bg-gradient-to-br from-[#2D3E83] to-[#1E40AF]
+                text-white
+                border border-white/10
+                shadow-md
+                transition-all duration-200
+                hover:-translate-y-0.5 hover:shadow-lg
+              `}
             >
               <PencilSquareIcon className="h-8 w-8 mb-3 text-blue-200 group-hover:scale-105 transition" />
-              <h2 className="text-lg font-semibold mb-1">Tạo bài thi mới</h2>
+              <h2 className="text-lg font-semibold mb-1">Tạo đề thi mới</h2>
               <p className="text-slate-100 text-sm">
-                Tạo bài thi mới từ ngân hàng câu hỏi
+                Tạo đề thi mới từ ngân hàng câu hỏi
               </p>
+            </div>
+
+            {/* Tạo câu hỏi thủ công */}
+            <div
+              onClick={() => navigate("/exam-bank")}
+              className={`group cursor-pointer p-6 rounded-xl min-h-[112px]
+                bg-gradient-to-br from-[#2D3E83] to-[#0EA5A3]
+                text-white
+                border border-white/10
+                shadow-md
+                transition-all duration-200
+                hover:-translate-y-0.5 hover:shadow-lg
+              `}
+            >
+              <PencilIcon className="h-8 w-8 mb-3 text-sky-200 group-hover:scale-105 transition" />
+              <h2 className="text-lg font-semibold mb-1">
+                Tạo câu hỏi thủ công
+              </h2>
+              <p className="text-cyan-100 text-sm">Tạo câu hỏi mới</p>
             </div>
 
             {/* Ngân hàng câu hỏi */}
             <div
               onClick={() => navigate("/questions")}
               className={`group cursor-pointer p-6 rounded-xl min-h-[112px]
-      bg-gradient-to-br from-[#2D3E83] to-[#3B5AB0]
-      text-white
-      border border-white/10
-      shadow-md
-      transition-all duration-200
-      hover:-translate-y-0.5 hover:shadow-lg
-    `}
+                bg-gradient-to-br from-[#2D3E83] to-[#3B5AB0]
+                text-white
+                border border-white/10
+                shadow-md
+                transition-all duration-200
+                hover:-translate-y-0.5 hover:shadow-lg
+              `}
             >
               <BookOpenIcon className="h-8 w-8 mb-3 text-cyan-200 group-hover:scale-105 transition" />
               <h2 className="text-lg font-semibold mb-1">Ngân hàng câu hỏi</h2>
@@ -164,37 +187,18 @@ const HomePage = () => {
             <div
               onClick={() => navigate("/exam-bank")}
               className={`group cursor-pointer p-6 rounded-xl min-h-[112px]
-      bg-gradient-to-br from-[#2D3E83] to-[#5B21B6]
-      text-white
-      border border-white/10
-      shadow-md
-      transition-all duration-200
-      hover:-translate-y-0.5 hover:shadow-lg
-    `}
+                bg-gradient-to-br from-[#2D3E83] to-[#5B21B6]
+                text-white
+                border border-white/10
+                shadow-md
+                transition-all duration-200
+                hover:-translate-y-0.5 hover:shadow-lg
+              `}
             >
-              <ChartBarIcon className="h-8 w-8 mb-3 text-indigo-200 group-hover:scale-105 transition" />
+              <ClipboardDocumentListIcon className="h-8 w-8 mb-3 text-indigo-200 group-hover:scale-105 transition" />
               <h2 className="text-lg font-semibold mb-1">Ngân hàng đề thi</h2>
               <p className="text-indigo-100 text-sm">
                 Xem và quản lý các đề thi
-              </p>
-            </div>
-
-            {/* Tìm kiếm bài thi */}
-            <div
-              onClick={() => navigate("/exam-bank")}
-              className={`group cursor-pointer p-6 rounded-xl min-h-[112px]
-      bg-gradient-to-br from-[#2D3E83] to-[#0EA5A3]
-      text-white
-      border border-white/10
-      shadow-md
-      transition-all duration-200
-      hover:-translate-y-0.5 hover:shadow-lg
-    `}
-            >
-              <MagnifyingGlassIcon className="h-8 w-8 mb-3 text-sky-200 group-hover:scale-105 transition" />
-              <h2 className="text-lg font-semibold mb-1">Tìm kiếm bài thi</h2>
-              <p className="text-cyan-100 text-sm">
-                Tìm và tham gia các bài thi khác
               </p>
             </div>
           </div>
@@ -259,7 +263,7 @@ const HomePage = () => {
                               handleViewResult(
                                 exam.id,
                                 exam.finished,
-                                exam.exam_id
+                                exam.exam_id,
                               )
                             }
                             className="text-blue-600 hover:text-blue-800 text-xs font-medium"

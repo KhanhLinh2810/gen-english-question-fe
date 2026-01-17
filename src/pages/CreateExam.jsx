@@ -28,6 +28,7 @@ const CreateExam = () => {
   const [filters, setFilters] = useState({
     search: "",
     selectedFilter: "all", // all, selected, unselected
+    is_current_user_only: false,
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -78,8 +79,10 @@ const CreateExam = () => {
       const params = {
         page,
         limit: pagination.limit,
-        is_current_user_only: true,
       };
+      if (filters.is_current_user_only) {
+        params.is_current_user_only = true;
+      }
 
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.trim();
@@ -135,19 +138,19 @@ const CreateExam = () => {
       [field]: value,
     }));
 
-    if (field === "search") {
-      // Auto search with debounce
-      setTimeout(() => loadQuestions(1), 500);
-    } else {
-      loadQuestions(1);
-    }
+    // if (field === "search") {
+    //   // Auto search with debounce
+    //   setTimeout(() => loadQuestions(1), 500);
+    // } else {
+    //   loadQuestions(1);
+    // }
   };
 
   // Toggle question selection
   const toggleQuestionSelection = (question) => {
     setExamInfo((prev) => {
       const isSelected = prev.selectedQuestions.some(
-        (q) => q.id === question.id
+        (q) => q.id === question.id,
       );
 
       if (isSelected) {
@@ -155,7 +158,7 @@ const CreateExam = () => {
         return {
           ...prev,
           selectedQuestions: prev.selectedQuestions.filter(
-            (q) => q.id !== question.id
+            (q) => q.id !== question.id,
           ),
         };
       } else {
@@ -180,7 +183,7 @@ const CreateExam = () => {
     setExamInfo((prev) => ({
       ...prev,
       selectedQuestions: prev.selectedQuestions.map((q) =>
-        q.id === questionId ? { ...q, score: newScore } : q
+        q.id === questionId ? { ...q, score: newScore } : q,
       ),
     }));
   };
@@ -207,7 +210,7 @@ const CreateExam = () => {
     setExamInfo((prev) => ({
       ...prev,
       selectedQuestions: prev.selectedQuestions.filter(
-        (q) => !visibleIds.includes(q.id)
+        (q) => !visibleIds.includes(q.id),
       ),
     }));
   };
@@ -279,7 +282,7 @@ const CreateExam = () => {
 
       if (response.code === "SUCCESS") {
         toast.success(
-          isEditMode ? "Cập nhật đề thi thành công!" : "Tạo đề thi thành công!"
+          isEditMode ? "Cập nhật đề thi thành công!" : "Tạo đề thi thành công!",
         );
 
         if (isEditMode) {
@@ -322,6 +325,15 @@ const CreateExam = () => {
       setLoading(false);
     }
   };
+  const handleLimitChange = (newLimit) => {
+    setPagination((prev) => ({
+      ...prev,
+      limit: newLimit,
+      page: 1, // Reset to first page when changing limit
+    }));
+    // Reload immediately with the new limit (pass override to avoid relying on async state update)
+    loadQuestions(1, newLimit);
+  };
 
   // Load initial data
   // Load exam data for edit mode
@@ -332,8 +344,13 @@ const CreateExam = () => {
   }, [isEditMode, editExamId]);
 
   useEffect(() => {
-    loadQuestions();
-  }, []);
+    // Đối với search, ta dùng debounce để tránh gọi API liên tục
+    const delayDebounceFn = setTimeout(() => {
+      loadQuestions(1);
+    }, 200);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [filters.is_current_user_only, filters.search, filters.selectedFilter]);
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -432,7 +449,7 @@ const CreateExam = () => {
                   onChange={(e) =>
                     handleExamInfoChange(
                       "maxAttempts",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value),
                     )
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"
@@ -504,7 +521,7 @@ const CreateExam = () => {
                     onChange={(e) =>
                       handleFilterChange("search", e.target.value)
                     }
-                    placeholder="Nhập để tìm kiếm câu hỏi..."
+                    placeholder="Nhập nội dung câu hỏi, đáp án hoặc tags để tìm kiếm..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium placeholder-gray-500"
                   />
                 </div>
@@ -539,6 +556,46 @@ const CreateExam = () => {
                   </button>
                 </div>
               </div>
+
+              {/* <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="myQuestions"
+                    checked={filters.is_current_user_only}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "is_current_user_only",
+                        e.target.checked,
+                      )
+                    }
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="myQuestions"
+                    className="text-sm font-medium text-black"
+                  >
+                    Chỉ hiển thị câu hỏi của tôi
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-black">
+                    Hiển thị:
+                  </label>
+                  <select
+                    value={pagination.limit}
+                    onChange={(e) =>
+                      handleLimitChange(parseInt(e.target.value))
+                    }
+                    className="px-2 py-1 border border-gray-300 rounded text-sm text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={5}>5 câu hỏi/trang</option>
+                    <option value={10}>10 câu hỏi/trang</option>
+                    <option value={20}>20 câu hỏi/trang</option>
+                  </select>
+                </div>
+              </div> */}
             </div>
 
             {/* Questions List */}
@@ -552,12 +609,12 @@ const CreateExam = () => {
                 let filteredQuestions = questions;
                 if (filters.selectedFilter === "selected") {
                   filteredQuestions = questions.filter((q) =>
-                    examInfo.selectedQuestions.some((sq) => sq.id === q.id)
+                    examInfo.selectedQuestions.some((sq) => sq.id === q.id),
                   );
                 } else if (filters.selectedFilter === "unselected") {
                   filteredQuestions = questions.filter(
                     (q) =>
-                      !examInfo.selectedQuestions.some((sq) => sq.id === q.id)
+                      !examInfo.selectedQuestions.some((sq) => sq.id === q.id),
                   );
                 }
 
@@ -567,18 +624,18 @@ const CreateExam = () => {
                       {filters.selectedFilter === "selected"
                         ? "Chưa có câu hỏi nào được chọn"
                         : filters.selectedFilter === "unselected"
-                        ? "Tất cả câu hỏi đã được chọn"
-                        : "Không có câu hỏi nào"}
+                          ? "Tất cả câu hỏi đã được chọn"
+                          : "Không có câu hỏi nào"}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {filteredQuestions.map((question, index) => {
                       const isSelected = examInfo.selectedQuestions.some(
-                        (q) => q.id === question.id
+                        (q) => q.id === question.id,
                       );
                       const selectedQuestion = examInfo.selectedQuestions.find(
-                        (q) => q.id === question.id
+                        (q) => q.id === question.id,
                       );
 
                       return (
@@ -655,7 +712,7 @@ const CreateExam = () => {
                                             )}
                                             <span className="font-medium w-5">
                                               {String.fromCharCode(
-                                                65 + choiceIndex
+                                                65 + choiceIndex,
                                               )}
                                               .
                                             </span>
@@ -669,7 +726,7 @@ const CreateExam = () => {
                                             </div>
                                           )}
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 )}
@@ -685,7 +742,7 @@ const CreateExam = () => {
                                       <span>•</span>
                                       <span>
                                         {new Date(
-                                          question.created_at
+                                          question.created_at,
                                         ).toLocaleDateString("vi-VN")}
                                       </span>
                                     </>
@@ -707,7 +764,7 @@ const CreateExam = () => {
                                     <span className="text-sm text-gray-700">
                                       {question.average_rating != null
                                         ? Number(
-                                            question.average_rating
+                                            question.average_rating,
                                           ).toFixed(1)
                                         : "-"}
                                     </span>
@@ -733,7 +790,7 @@ const CreateExam = () => {
                                   onChange={(e) =>
                                     updateQuestionScore(
                                       question.id,
-                                      parseInt(e.target.value) || 0
+                                      parseInt(e.target.value) || 0,
                                     )
                                   }
                                   className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black font-medium"

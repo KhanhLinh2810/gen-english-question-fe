@@ -64,15 +64,17 @@ const ManualQuestions = () => {
   const toggleQuestionSelection = (questionId) => {
     setQuestions(
       questions.map((q) =>
-        q.id === questionId ? { ...q, selected: !q.selected } : q
-      )
+        q.id === questionId ? { ...q, selected: !q.selected } : q,
+      ),
     );
   };
 
   // Update question field
   const updateQuestion = (questionId, field, value) => {
     setQuestions(
-      questions.map((q) => (q.id === questionId ? { ...q, [field]: value } : q))
+      questions.map((q) =>
+        q.id === questionId ? { ...q, [field]: value } : q,
+      ),
     );
   };
 
@@ -102,7 +104,7 @@ const ManualQuestions = () => {
           return { ...q, choices: newChoices };
         }
         return q;
-      })
+      }),
     );
   };
 
@@ -136,7 +138,7 @@ const ManualQuestions = () => {
           return { ...q, choices: updatedChoices };
         }
         return q;
-      })
+      }),
     );
   };
 
@@ -209,7 +211,7 @@ const ManualQuestions = () => {
     try {
       setLoadingAll(true);
       const response = await createQuestions(
-        transform_data_to_match_backend_API(selectedQuestions)
+        transform_data_to_match_backend_API(selectedQuestions),
       );
 
       if (response.code === "SUCCESS") {
@@ -235,7 +237,7 @@ const ManualQuestions = () => {
     try {
       setLoading(true);
       const response = await createQuestions(
-        transform_data_to_match_backend_API(selectedQuestions)
+        transform_data_to_match_backend_API(selectedQuestions),
       );
 
       if (response.code === "SUCCESS") {
@@ -366,7 +368,7 @@ const ManualQuestions = () => {
                         updateQuestion(
                           question.id,
                           "points",
-                          parseInt(e.target.value) || 1
+                          parseInt(e.target.value) || 1,
                         )
                       }
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D3E83] text-slate-800 font-medium hover:shadow-sm transition duration-150"
@@ -382,7 +384,7 @@ const ManualQuestions = () => {
                         updateQuestion(
                           question.id,
                           "type",
-                          parseInt(e.target.value)
+                          parseInt(e.target.value),
                         )
                       }
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D3E83] text-slate-800 font-medium hover:shadow-sm transition duration-150"
@@ -442,7 +444,7 @@ const ManualQuestions = () => {
                         updateQuestion(
                           question.id,
                           "description",
-                          e.target.value
+                          e.target.value,
                         )
                       }
                       placeholder="Nhập mô tả câu hỏi nếu có..."
@@ -492,7 +494,7 @@ const ManualQuestions = () => {
                                   question.id,
                                   choice.id,
                                   "isCorrect",
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               className="w-4 h-4 text-[#2D3E83] focus:ring-[#2D3E83]"
@@ -505,7 +507,7 @@ const ManualQuestions = () => {
                                   question.id,
                                   choice.id,
                                   "text",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               placeholder={`Lựa chọn ${choice.id}`}
@@ -518,7 +520,7 @@ const ManualQuestions = () => {
                               }
                               className="px-2 py-1 bg-gray-100 hover:bg-[#EEF2FF] rounded-md text-sm font-medium text-[#2D3E83] transition"
                             >
-                              {showExplanation ? "Ẩn ghi chú" : "Ghi chú"}
+                              {showExplanation ? "Ẩn giải thích" : "Giải thích"}
                             </button>
                           </div>
 
@@ -532,10 +534,10 @@ const ManualQuestions = () => {
                                     question.id,
                                     choice.id,
                                     "explanation",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
-                                placeholder="Nhập ghi chú giải thích..."
+                                placeholder="Nhập giải thích cho câu trả lời..."
                                 className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D3E83] text-slate-800 font-medium placeholder-gray-500 hover:shadow-sm transition duration-150"
                               />
                             </div>
