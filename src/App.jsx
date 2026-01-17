@@ -49,7 +49,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-100">
       <main className={!hideLayout ? "" : "min-h-screen w-full"}>
         <Routes>
-//           <Route
+          //{" "}
+          <Route
             path="/"
             element={
               <ProtectedRoute>
@@ -58,14 +59,13 @@ export default function App() {
             }
           />
           <Route
-            path="/GenQuestion"
+            path="/gen-questions"
             element={
               <ProtectedRoute>
                 <GenQuestion />
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/login"
             element={
@@ -129,7 +129,7 @@ export default function App() {
                 <TakeExam />
               </ProtectedRoute>
             }
-          />  
+          />
           <Route
             path="/exam-result"
             element={
@@ -154,7 +154,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          
           {/* <Route path="/" element={<HomePage />} />
           <Route path="/GenQuestion" element={<GenQuestion />} />
           <Route path="/login" element={<Login />} />

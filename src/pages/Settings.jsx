@@ -101,14 +101,14 @@ const Settings = () => {
           setUser({
             ...user,
             avatar: response.data.avatar,
-          })
+          }),
         );
       }
     } catch (error) {
       console.error("Error updating avatar:", error);
       toast.error(
         error.response?.data?.message ||
-          "Có lỗi xảy ra khi cập nhật ảnh đại diện"
+          "Có lỗi xảy ra khi cập nhật ảnh đại diện",
       );
     } finally {
       setLoading(false);
@@ -203,7 +203,7 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        "Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác."
+        "Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác.",
       )
     ) {
       return;
@@ -234,9 +234,9 @@ const Settings = () => {
   };
 
   return (
-     <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
+    <div className="flex min-h-screen gap-6 bg-gray-50 p-6">
       {/* Sidebar */}
-      <div className="w-80">
+      <div className="w-80 flex-shrink-0">
         <SidebarMenu />
       </div>
 

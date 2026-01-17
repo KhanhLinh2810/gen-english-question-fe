@@ -53,7 +53,7 @@ const ExamReview = () => {
     if (selectedChoices.length !== correctChoices.length) return false;
 
     return selectedChoices.every((selected) =>
-      correctChoices.some((correct) => correct.id === selected.id)
+      correctChoices.some((correct) => correct.id === selected.id),
     );
   };
 
@@ -91,13 +91,13 @@ const ExamReview = () => {
 
   // Sort questions by order
   const sortedQuestions = [...examData.list_question].sort(
-    (a, b) => (a.order || 0) - (b.order || 0)
+    (a, b) => (a.order || 0) - (b.order || 0),
   );
 
   return (
-    <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
+    <div className="flex min-h-screen gap-6 bg-gray-50 p-6">
       {/* Sidebar */}
-      <div className="w-80">
+      <div className="w-80 flex-shrink-0">
         <SidebarMenu />
       </div>
 
@@ -175,7 +175,7 @@ const ExamReview = () => {
                     {question.choices &&
                       question.choices.map((choice, choiceIndex) => {
                         const choiceLabel = String.fromCharCode(
-                          65 + choiceIndex
+                          65 + choiceIndex,
                         ); // A, B, C, D
                         const isSelected = choice.is_selected;
                         const isCorrectChoice = choice.is_correct;

@@ -238,9 +238,9 @@ const QuestionsBank = () => {
   }, [searchTimeout]);
 
   return (
-    <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
+    <div className="flex min-h-screen gap-6 bg-gray-50 p-6">
       {/* Sidebar */}
-      <div className="w-80">
+      <div className="w-80 flex-shrink-0">
         <SidebarMenu />
       </div>
 

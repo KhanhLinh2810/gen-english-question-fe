@@ -300,9 +300,9 @@ const ManualQuestions = () => {
   };
 
   return (
-    <div className="flex gap-4 bg-gray-100 min-h-screen p-4">
+    <div className="flex min-h-screen gap-6 bg-gray-50 p-6">
       {/* Sidebar */}
-      <div className="w-80">
+      <div className="w-80 flex-shrink-0">
         <SidebarMenu />
       </div>
 
@@ -561,28 +561,30 @@ const ManualQuestions = () => {
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
+          {/* Bottom actions */}
+          <div className="mt-10 flex flex-wrap gap-4 border-t border-gray-200 pt-8">
             <button
               onClick={saveAllQuestions}
               disabled={loadingAll}
-              className="bg-cyan-500 text-white px-5 py-2.5 rounded-lg hover:bg-cyan-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-green-500 px-6 py-3 font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 transition"
             >
-              {loadingAll ? "Đang lưu..." : "Lưu tất cả vào ngân hàng câu hỏi"}
+              {loadingAll ? "Đang lưu..." : "Lưu tất cả vào ngân hàng"}
             </button>
+
             <button
               onClick={saveQuestions}
               disabled={loading}
-              className="bg-cyan-500 text-white px-5 py-2.5 rounded-lg hover:bg-cyan-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-cyan-500 px-6 py-3 font-medium text-white shadow-sm hover:bg-cyan-700 disabled:opacity-50 transition"
             >
-              {loading ? "Đang lưu..." : "Lưu vào ngân hàng câu hỏi"}
+              {loading ? "Đang lưu..." : "Lưu đã chọn"}
             </button>
+
             <button
               onClick={clearAll}
               disabled={loading}
-              className="bg-red-500 text-white px-5 py-2.5 rounded-lg hover:bg-red-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-red-500 px-6 py-3 font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 transition"
             >
-              Xóa nội dung các ô
+              Xóa toàn bộ
             </button>
           </div>
         </div>
