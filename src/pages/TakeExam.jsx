@@ -8,6 +8,7 @@ import {
   saveAnswer,
   submitExam,
 } from "../api/examAttemptApi";
+import { hanldeError } from "../utils/error.response";
 
 const TakeExam = () => {
   const [searchParams] = useSearchParams();
@@ -72,24 +73,17 @@ const TakeExam = () => {
           const durationMinutes = examData.duration || 0;
           const startedAt = new Date(examData.started_at);
           const endTime = new Date(
-            startedAt.getTime() + durationMinutes * 60 * 1000
+            startedAt.getTime() + durationMinutes * 60 * 1000,
           );
           const now = new Date();
           const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
           setTimeRemaining(remaining);
         }
       } catch (error) {
-        let msg = "Có lỗi xảy ra khi khởi tạo bài thi";
-
-        const e = error.response?.data;
-        if (e) {
-          if (e.data?.message) msg = e.data.message;
-          else if (e.message) msg = e.message;
-
-          if (e.code === "no_more_turns")
-            msg = e.data?.message || "Bạn đã hết lượt làm bài";
-        }
-
+        const msg = hanldeError(
+          error.response?.data?.code,
+          "Có lỗi xảy ra khi khởi tạo bài thi",
+        );
         toast.error(msg);
         navigate("/exam-bank");
       } finally {
@@ -298,8 +292,8 @@ const TakeExam = () => {
                         isCurrent
                           ? "bg-[#2D3E83] text-white border-[#2D3E83]"
                           : isAnswered
-                          ? "bg-emerald-100 text-black border-emerald-200"
-                          : "bg-slate-100 text-black border-gray-100 hover:bg-slate-200"
+                            ? "bg-emerald-100 text-black border-emerald-200"
+                            : "bg-slate-100 text-black border-gray-100 hover:bg-slate-200"
                       }`}
                     >
                       {idx + 1}
@@ -329,8 +323,8 @@ const TakeExam = () => {
                       isCurrent
                         ? "bg-[#2D3E83] text-white border-[#2D3E83]"
                         : isAnswered
-                        ? "bg-emerald-100 text-black border-emerald-200"
-                        : "bg-slate-100 text-black border-gray-100 hover:bg-slate-200"
+                          ? "bg-emerald-100 text-black border-emerald-200"
+                          : "bg-slate-100 text-black border-gray-100 hover:bg-slate-200"
                     }`}
                   >
                     {idx + 1}
@@ -429,8 +423,8 @@ const TakeExam = () => {
                     {submitting
                       ? "Đang nộp..."
                       : isSubmitted
-                      ? "Đã nộp"
-                      : "Câu sau"}
+                        ? "Đã nộp"
+                        : "Câu sau"}
                   </button>
                 ) : (
                   <button
@@ -441,8 +435,8 @@ const TakeExam = () => {
                     {submitting
                       ? "Đang nộp..."
                       : isSubmitted
-                      ? "Đã nộp"
-                      : "Nộp bài"}
+                        ? "Đã nộp"
+                        : "Nộp bài"}
                   </button>
                 )}
               </div>

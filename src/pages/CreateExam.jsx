@@ -226,16 +226,18 @@ const CreateExam = () => {
     }
 
     if (!examInfo.startTime) {
-      toast.error("Vui lòng chọn thời gian mở đề");
-      return;
+      examInfo.startTime = new Date();
     }
 
-    if (!examInfo.endTime) {
-      toast.error("Vui lòng chọn thời gian đóng đề");
-      return;
-    }
+    // if (!examInfo.endTime) {
+    //   toast.error("Vui lòng chọn thời gian đóng đề");
+    //   return;
+    // }
 
-    if (new Date(examInfo.startTime) >= new Date(examInfo.endTime)) {
+    if (
+      examInfo.endTime &&
+      new Date(examInfo.startTime) >= new Date(examInfo.endTime)
+    ) {
       toast.error("Thời gian mở đề phải trước thời gian đóng đề");
       return;
     }

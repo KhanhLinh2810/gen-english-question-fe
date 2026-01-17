@@ -1,12 +1,12 @@
-import { apiCaller } from './apiCaller.js';
+import { apiCaller } from "./apiCaller.js";
 
 // Get questions list
 export const getQuestions = async (params = {}) => {
   try {
-    const response = await apiCaller.get('/user/questions', { params });
+    const response = await apiCaller.get("/user/questions", { params });
     return response.data;
   } catch (error) {
-    console.error('Error getting questions:', error);
+    console.error("Error getting questions:", error);
     throw error;
   }
 };
@@ -17,7 +17,7 @@ export const getQuestionDetail = async (questionId) => {
     const response = await apiCaller.get(`/user/questions/${questionId}`);
     return response.data;
   } catch (error) {
-    console.error('Error getting question detail:', error);
+    console.error("Error getting question detail:", error);
     throw error;
   }
 };
@@ -25,10 +25,10 @@ export const getQuestionDetail = async (questionId) => {
 // Create manual questions
 export const createQuestions = async (questionsData) => {
   try {
-    const response = await apiCaller.post('/user/questions', questionsData);
+    const response = await apiCaller.post("/user/questions", questionsData);
     return response.data;
   } catch (error) {
-    console.error('Error creating questions:', error);
+    console.error("Error creating questions:", error);
     throw error;
   }
 };
@@ -36,10 +36,13 @@ export const createQuestions = async (questionsData) => {
 // Update question
 export const updateQuestion = async (questionId, questionData) => {
   try {
-    const response = await apiCaller.put(`/user/questions/${questionId}`, questionData);
+    const response = await apiCaller.put(
+      `/user/questions/${questionId}`,
+      questionData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating question:', error);
+    console.error("Error updating question:", error);
     throw error;
   }
 };
@@ -50,7 +53,7 @@ export const deleteQuestion = async (questionId) => {
     const response = await apiCaller.delete(`/user/questions/${questionId}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting question:', error);
+    console.error("Error deleting question:", error);
     throw error;
   }
 };

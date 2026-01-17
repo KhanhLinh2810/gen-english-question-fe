@@ -475,7 +475,7 @@ const ExamBank = () => {
                           <span className="font-medium">Đóng đề:</span>{" "}
                           {exam.lastest_start_time
                             ? new Date(exam.lastest_start_time).toLocaleString()
-                            : "N/A"}
+                            : "Không giới hạn"}
                         </div>
                         <div>
                           <span className="font-medium">Lượt thi tối đa:</span>{" "}
