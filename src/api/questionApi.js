@@ -33,12 +33,26 @@ export const createQuestions = async (questionsData) => {
   }
 };
 
+// Create auto questions
+export const createAutoQuestions = async (questionsData) => {
+  try {
+    const response = await apiCaller.post(
+      "/user/questions/automatic",
+      questionsData,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating questions:", error);
+    throw error;
+  }
+};
+
 // Update question
 export const updateQuestion = async (questionId, questionData) => {
   try {
     const response = await apiCaller.put(
       `/user/questions/${questionId}`,
-      questionData
+      questionData,
     );
     return response.data;
   } catch (error) {

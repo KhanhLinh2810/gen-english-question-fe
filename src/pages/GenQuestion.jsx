@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import SidebarMenu from "../components/SidebarMenu";
 import ConfirmModal from "../components/ConfirmModal";
-import { createQuestions } from "../api/questionApi.js";
+import { createAutoQuestions, createQuestions } from "../api/questionApi.js";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { ChoiceCountOptions, QuestionTypes } from "../enums/question.js";
+import { hanldeError } from "../utils/error.response.js";
 
 const GenQuestion = () => {
   const [questionInput, setQuestionInput] = useState({
@@ -236,22 +237,34 @@ const GenQuestion = () => {
   };
 
   const genQuestions = async () => {
-    const newQuestion = {
-      id: Date.now(),
-      question: "question 1",
-      description: "question 2",
-      type: 1,
-      points: 1,
-      tags: "",
-      choices: [
-        { id: 1, text: "choice", isCorrect: true, explanation: "" },
-        { id: 2, text: "choice", isCorrect: false, explanation: "" },
-        { id: 3, text: "choice", isCorrect: false, explanation: "" },
-        { id: 4, text: "choice", isCorrect: false, explanation: "" },
-      ],
-      selected: false,
-    };
-    setQuestions([...questions, newQuestion]);
+    if (!questionInput.data.trim() && isParagraphQuestion) {
+      toast.error("Vui lòng nhập đoạn văn bản để sinh câu hỏi");
+      return;
+    }
+    if (!questionInput.questions || questionInput.questions.length === 0) {
+      toast.error("Vui lòng cung cấp cấu hình câu hỏi để sinh");
+      return;
+    }
+    const totalQuestions = questionInput.questions.reduce(
+      (sum, q) => sum + q.numQuestions,
+      0,
+    );
+    if (totalQuestions > 20) {
+      toast.error("Tổng số câu hỏi sinh ra không được vượt quá 20 câu");
+      return;
+    }
+
+    try {
+      const listNewQuestion = await createAutoQuestions(questionInput);
+
+      setQuestions(listNewQuestion);
+    } catch (error) {
+      const msg = hanldeError(
+        error.response?.data?.code,
+        "Có lỗi xảy ra khi sinh câu hỏi",
+      );
+      toast.error(msg);
+    }
   };
 
   // Save all questions to database
@@ -730,7 +743,6 @@ const GenQuestion = () => {
                     </div>
                   ))}
                 </div>
-
                 {/* Bottom actions */}
                 <div className="mt-10 flex flex-wrap gap-4 border-t border-gray-200 pt-8">
                   <button
@@ -757,38 +769,20 @@ const GenQuestion = () => {
                     Xóa toàn bộ
                   </button>
                 </div>
+                {/* Confirm Modal */}
+                <ConfirmModal
+                  isOpen={confirmModal.isOpen}
+                  onClose={closeConfirmModal}
+                  onConfirm={confirmModal.onConfirm}
+                  title={confirmModal.title}
+                  message={confirmModal.message}
+                  type={confirmModal.type}
+                  confirmText="Xóa"
+                  cancelText="Hủy"
+                />
               </>
             )}
           </div>
-
-          {/* Action Buttons */}
-          {questions.length > 0 && (
-            <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
-              <button
-                onClick={saveAllQuestions}
-                disabled={loadingAll}
-                className="bg-cyan-500 text-white px-5 py-2.5 rounded-lg hover:bg-cyan-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loadingAll
-                  ? "Đang lưu..."
-                  : "Lưu tất cả vào ngân hàng câu hỏi"}
-              </button>
-              <button
-                onClick={saveQuestions}
-                disabled={loading}
-                className="bg-cyan-500 text-white px-5 py-2.5 rounded-lg hover:bg-cyan-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Đang lưu..." : "Lưu vào ngân hàng câu hỏi"}
-              </button>
-              <button
-                onClick={clearAll}
-                disabled={loading}
-                className="bg-red-500 text-white px-5 py-2.5 rounded-lg hover:bg-red-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Xóa nội dung các câu hỏi còn lại
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
