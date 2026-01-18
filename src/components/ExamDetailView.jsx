@@ -7,7 +7,10 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
-import { getExamAttempts } from "../api/examAttemptApi";
+import {
+  getExamAttempts,
+  exportExcelExamAttempts,
+} from "../api/examAttemptApi";
 import { useNavigate } from "react-router-dom";
 
 const ExamDetailView = ({ exam, onBack }) => {
@@ -37,9 +40,9 @@ const ExamDetailView = ({ exam, onBack }) => {
               name: attempt.exam?.title || "Đề thi không xác định",
               username: attempt.user?.username || "Người dùng ẩn danh",
               started_at: new Date(attempt.started_at).toLocaleString("vi-VN"),
-              finished_at: new Date(attempt.finished_at).toLocaleString(
-                "vi-VN",
-              ),
+              finished_at: attempt.finished_at
+                ? new Date(attempt.finished_at).toLocaleString("vi-VN")
+                : "-",
               score:
                 attempt.finished_at && attempt.score != null
                   ? `${Number(attempt.score).toFixed(1)}${
@@ -66,6 +69,20 @@ const ExamDetailView = ({ exam, onBack }) => {
       navigate(`/exam-result?attempt_id=${attemptId}`);
     } else {
       toast.error("Bài thi chưa hoàn thành. Vui lòng quay lại sau.");
+    }
+  };
+
+  const exportExcel = async () => {
+    try {
+      await exportExcelExamAttempts({
+        page: 1,
+        limit: 5,
+        exam_id: exam.id,
+        sortBy: "created_at",
+        sortOrder: "DESC",
+      });
+    } catch (error) {
+      toast.error("Xuất báo cáo thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -319,6 +336,16 @@ const ExamDetailView = ({ exam, onBack }) => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Start Exam Button */}
+          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center">
+            <button
+              onClick={exportExcel}
+              className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg transition flex items-center gap-2"
+            >
+              <span>Xuất báo cáo</span>
+            </button>
           </div>
         </div>
       )}

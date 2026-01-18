@@ -17,7 +17,7 @@ export const createExamAttempt = async (examId) => {
 export const getExamAttemptDetail = async (attemptId) => {
   try {
     const response = await apiCaller.get(
-      `/user/exam-attempts/${attemptId}/exams`
+      `/user/exam-attempts/${attemptId}/exams`,
     );
     return response.data;
   } catch (error) {
@@ -44,7 +44,7 @@ export const saveAnswer = async (attemptId, answers) => {
       `/user/exam-attempts/${attemptId}/answer`,
       {
         list_answer: answers,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -60,7 +60,7 @@ export const submitExam = async (attemptId, answers) => {
       `/user/exam-attempts/${attemptId}/submit`,
       {
         list_answer: answers,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -73,6 +73,35 @@ export const submitExam = async (attemptId, answers) => {
 export const getExamAttempts = async (params = {}) => {
   try {
     const response = await apiCaller.get("/user/exam-attempts", { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error getting exam attempts:", error);
+    throw error;
+  }
+};
+
+export const exportExcelExamAttempts = async (params = {}) => {
+  try {
+    const response = await apiCaller.get("/user/exam-attempts/excel", {
+      params,
+      responseType: "blob",
+    }); // Tạo một URL tạm thời cho file
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+
+    // Đặt tên file (nên khớp với tên từ phía Backend gửi về)
+    const fileName = `Bao_Cao_Ket_Qua_${new Date().getTime()}.xlsx`;
+    link.setAttribute("download", fileName);
+
+    // Kích hoạt click để tải về
+    document.body.appendChild(link);
+    link.click();
+
+    // Dọn dẹp bộ nhớ
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
     return response.data;
   } catch (error) {
     console.error("Error getting exam attempts:", error);
