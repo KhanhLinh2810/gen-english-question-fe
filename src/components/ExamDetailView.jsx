@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   UserCircleIcon,
@@ -6,9 +6,68 @@ import {
   ClockIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
+import { getExamAttempts } from "../api/examAttemptApi";
+import { useNavigate } from "react-router-dom";
 
 const ExamDetailView = ({ exam, onBack }) => {
   if (!exam) return null;
+  const [recentExams, setRecentExams] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchExamAttempts = async () => {
+      try {
+        const attemptsResponse = await getExamAttempts({
+          page: 1,
+          limit: 5,
+          exam_id: exam.id,
+          sortBy: "created_at",
+          sortOrder: "DESC",
+        });
+
+        if (attemptsResponse.code === "SUCCESS") {
+          const attemptsData = Array.isArray(attemptsResponse.data)
+            ? attemptsResponse.data
+            : [];
+          setRecentExams(
+            attemptsData.map((attempt) => ({
+              id: attempt.id,
+              exam_id: attempt.exam_id,
+              name: attempt.exam?.title || "Đề thi không xác định",
+              username: attempt.user?.username || "Người dùng ẩn danh",
+              started_at: new Date(attempt.started_at).toLocaleString("vi-VN"),
+              finished_at: new Date(attempt.finished_at).toLocaleString(
+                "vi-VN",
+              ),
+              score:
+                attempt.finished_at && attempt.score != null
+                  ? `${Number(attempt.score).toFixed(1)}${
+                      attempt.total_question
+                        ? `/${Number(attempt.exam?.max_score ?? attempt.total_question).toFixed(1)}`
+                        : ""
+                    }`
+                  : "-",
+              status: attempt.finished_at ? "Hoàn thành" : "Đang làm",
+              finished: !!attempt.finished_at,
+            })),
+          );
+        }
+      } catch (error) {
+        toast.error("Không thể tải lịch sử làm bài.");
+      }
+    };
+
+    fetchExamAttempts();
+  }, [exam.id]);
+
+  const handleViewResult = (attemptId, finished) => {
+    if (finished) {
+      navigate(`/exam-result?attempt_id=${attemptId}`);
+    } else {
+      toast.error("Bài thi chưa hoàn thành. Vui lòng quay lại sau.");
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Không giới hạn";
@@ -192,6 +251,77 @@ const ExamDetailView = ({ exam, onBack }) => {
           <span>Bắt đầu làm bài</span>
         </button>
       </div>
+
+      {/* Recent Activity Section */}
+      {recentExams.length !== 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Lịch sử làm bài gần đây
+          </h2>
+
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Thí sinh
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Bắt đầu
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Kết thúc
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Điểm số
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Trạng thái
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 font-medium">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentExams.map((exam) => (
+                  <tr key={exam.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-800">{exam.username}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {exam.started_at}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {exam.finished_at}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{exam.score}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          exam.finished
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {exam.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() =>
+                          handleViewResult(exam.id, exam.finished, exam.exam_id)
+                        }
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                      >
+                        {exam.finished ? "Xem kết quả" : "Tiếp tục"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

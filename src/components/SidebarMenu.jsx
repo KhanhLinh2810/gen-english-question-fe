@@ -72,11 +72,11 @@ const SidebarMenu = () => {
       icon: ClipboardDocumentListIcon,
       path: "/exam-bank",
     },
-    {
-      label: "Lịch sử làm bài",
-      icon: ClockIcon,
-      path: "/history",
-    },
+    // {
+    //   label: "Lịch sử làm bài",
+    //   icon: ClockIcon,
+    //   path: "/history",
+    // },
     {
       label: "Cài đặt",
       icon: Cog6ToothIcon,
