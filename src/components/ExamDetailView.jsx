@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  LabelList,
+} from "recharts";
 import {
   UserCircleIcon,
   ClipboardDocumentListIcon,
@@ -16,14 +26,16 @@ import { useNavigate } from "react-router-dom";
 const ExamDetailView = ({ exam, onBack }) => {
   if (!exam) return null;
   const [recentExams, setRecentExams] = useState([]);
+  const [averageScore, setAverageScore] = useState("0.0");
   const navigate = useNavigate();
 
+  const [chartData, setChartData] = useState([]);
   useEffect(() => {
     const fetchExamAttempts = async () => {
       try {
         const attemptsResponse = await getExamAttempts({
           page: 1,
-          limit: 5,
+          limit: 100,
           exam_id: exam.id,
           sortBy: "created_at",
           sortOrder: "DESC",
@@ -33,11 +45,11 @@ const ExamDetailView = ({ exam, onBack }) => {
           const attemptsData = Array.isArray(attemptsResponse.data)
             ? attemptsResponse.data
             : [];
+
           setRecentExams(
-            attemptsData.map((attempt) => ({
+            attemptsData.slice(0, 10).map((attempt) => ({
               id: attempt.id,
               exam_id: attempt.exam_id,
-              name: attempt.exam?.title || "Đề thi không xác định",
               username: attempt.user?.username || "Người dùng ẩn danh",
               started_at: new Date(attempt.started_at).toLocaleString("vi-VN"),
               finished_at: attempt.finished_at
@@ -45,22 +57,52 @@ const ExamDetailView = ({ exam, onBack }) => {
                 : "-",
               score:
                 attempt.finished_at && attempt.score != null
-                  ? `${Number(attempt.score).toFixed(1)}${
-                      attempt.total_question
-                        ? `/${Number(attempt.exam?.max_score ?? attempt.total_question).toFixed(1)}`
-                        : ""
-                    }`
+                  ? Number(attempt.score).toFixed(1)
                   : "-",
               status: attempt.finished_at ? "Hoàn thành" : "Đang làm",
               finished: !!attempt.finished_at,
             })),
+          );
+
+          // 2. Lọc dữ liệu sạch để tính toán biểu đồ & điểm trung bình
+          const finishedExams = attemptsData.filter(
+            (item) =>
+              item.finished_at &&
+              item.score !== null &&
+              !isNaN(parseFloat(item.score)),
+          );
+
+          // 3. Tính phân bổ điểm số (Trục X: Điểm, Trục Y: Số lượng)
+          const distribution = finishedExams.reduce((acc, curr) => {
+            const scoreLabel = Number(curr.score).toFixed(1);
+            acc[scoreLabel] = (acc[scoreLabel] || 0) + 1;
+            return acc;
+          }, {});
+
+          const sortedDist = Object.keys(distribution)
+            .map((score) => ({
+              score: parseFloat(score),
+              count: distribution[score],
+            }))
+            .sort((a, b) => a.score - b.score);
+
+          setChartData(sortedDist);
+
+          // 4. Tính điểm trung bình
+          const totalScore = finishedExams.reduce(
+            (sum, item) => sum + parseFloat(item.score),
+            0,
+          );
+          setAverageScore(
+            finishedExams.length > 0
+              ? (totalScore / finishedExams.length).toFixed(1)
+              : "0.0",
           );
         }
       } catch (error) {
         toast.error("Không thể tải lịch sử làm bài.");
       }
     };
-
     fetchExamAttempts();
   }, [exam.id]);
 
@@ -272,6 +314,72 @@ const ExamDetailView = ({ exam, onBack }) => {
       {/* Recent Activity Section */}
       {recentExams.length !== 0 && (
         <div className="mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm mt-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Phân bổ điểm số
+              </h3>
+              <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+                <span className="text-sm text-blue-600 font-medium">
+                  Điểm trung bình:{" "}
+                </span>
+                <span className="text-xl font-bold text-blue-700">
+                  {averageScore}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ width: "100%", height: 350 }}>
+              <ResponsiveContainer>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="score"
+                    label={{ value: "Điểm số", position: "bottom", offset: 0 }}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    label={{
+                      value: "Số lượng thí sinh",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "#f3f4f6" }}
+                    formatter={(value) => [`${value} thí sinh`, "Số lượng"]}
+                    labelFormatter={(label) => `Điểm: ${label}`}
+                  />
+
+                  {/* Đường kẻ hiển thị Điểm trung bình */}
+                  <ReferenceLine
+                    x={parseFloat(averageScore)}
+                    stroke="red"
+                    strokeDasharray="5 5"
+                    label={{
+                      position: "top",
+                      value: `TB: ${averageScore}`,
+                      fill: "red",
+                      fontSize: 12,
+                    }}
+                  />
+
+                  <Bar
+                    dataKey="count"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  >
+                    <LabelList dataKey="count" position="top" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Lịch sử làm bài gần đây
           </h2>
@@ -338,7 +446,7 @@ const ExamDetailView = ({ exam, onBack }) => {
             </table>
           </div>
 
-          {/* Start Exam Button */}
+          {/* export Button */}
           <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center">
             <button
               onClick={exportExcel}
