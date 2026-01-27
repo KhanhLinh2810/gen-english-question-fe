@@ -236,6 +236,49 @@ const GenQuestion = () => {
     };
   };
 
+  const transform_data_to_match_backend_API_gen_question = () => {
+    let description, list_words;
+    if (
+      questionInput.questions.length != 0 &&
+      questionInput.questions[0].type >= 21
+    ) {
+      description = questionInput.data;
+      list_words = [];
+    } else {
+      list_words = (questionInput.data ?? "")
+        .split(",")
+        .map((w) => w.trim())
+        .filter(Boolean);
+    }
+    return {
+      list_words,
+      description,
+      questions: questionInput.questions.map((q) => ({
+        type: q.type,
+        num_question: q.numQuestions,
+        num_ans_per_question: q.numChoicePerQuestion,
+      })),
+    };
+  };
+
+  const transform_data_to_match_FE = (list_question) => {
+    return list_question.map((q, qIndex) => ({
+      id: Date.now().toString() + qIndex.toString(),
+      question: q.content,
+      description: q.description,
+      type: q.type,
+      points: q.score,
+      tags: q.tags || "",
+      choices: q.choices.map((c, cIndex) => ({
+        id: cIndex + 1,
+        text: c.content,
+        isCorrect: c.is_correct,
+        explanation: c.explanation,
+      })),
+      selected: false,
+    }));
+  };
+
   const genQuestions = async () => {
     if (!questionInput.data.trim() && isParagraphQuestion) {
       toast.error("Vui lòng nhập đoạn văn bản để sinh câu hỏi");
@@ -253,16 +296,47 @@ const GenQuestion = () => {
       toast.error("Tổng số câu hỏi sinh ra không được vượt quá 20 câu");
       return;
     }
+    let num_ans_per_question;
+    let q_type;
+    for (const q of questionInput.questions) {
+      if (q_type) {
+        if ((q_type >= 21 && q.type < 21) || (q_type < 21 && q.type >= 21)) {
+          toast.error(
+            "Không thể vừa tạo câu hỏi đơn vừa tạo câu hỏi đọc hiểu đoạn văn",
+          );
+          return;
+        }
+        if (num_ans_per_question !== q.numChoicePerQuestion) {
+          toast.error(
+            "Số lượng đáp án của các câu hỏi đọc hiểu phải bằng nhau",
+          );
+          return;
+        }
+      } else {
+        num_ans_per_question = q.numChoicePerQuestion;
+      }
+      if (q.type >= 1 && q.type <= 4 && q.numChoicePerQuestion < 3) {
+        toast.error(
+          "Số đáp án của câu hỏi trọng âm, phiên âm, từ đồng nghĩa, trái nghĩa phải lớn hơn hoặc bằng 3",
+        );
+        return;
+      }
+      q_type = q.type;
+    }
 
     try {
-      const listNewQuestion = await createAutoQuestions(questionInput);
+      toast.info("Quá trình sinh câu hỏi có thể diễn ra trong vài phút");
+      const listNewQuestion = await createAutoQuestions(
+        transform_data_to_match_backend_API_gen_question(questionInput),
+      );
 
-      setQuestions(listNewQuestion);
+      setQuestions(transform_data_to_match_FE(listNewQuestion.data));
     } catch (error) {
       const msg = hanldeError(
         error.response?.data?.code,
         "Có lỗi xảy ra khi sinh câu hỏi",
       );
+      console.log(error);
       toast.error(msg);
     }
   };
@@ -372,15 +446,13 @@ const GenQuestion = () => {
               {/* Textarea input */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  {isParagraphQuestion ? "Đoạn văn mô tả" : "Danh sách từ vựng"}
+                  "Đoạn văn mô tả / Danh sách từ vựng"
                 </label>
                 <textarea
                   value={questionInput.data}
                   onChange={(e) => updateQuestionInput("data", e.target.value)}
                   placeholder={
-                    isParagraphQuestion
-                      ? "Nhập đoạn văn bản dùng để tạo câu hỏi..."
-                      : "Nhập danh sách từ vựng, cách nhau bằng dấu phẩy (vd: apple, banana, orange)..."
+                    "Nhập đoạn văn bản hoặc danh sách từ vựng, cách nhau bằng dấu phẩy (vd: apple, banana, orange)..."
                   }
                   rows={3}
                   className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-800 placeholder-gray-400
@@ -422,7 +494,7 @@ const GenQuestion = () => {
                             q.id,
                           )
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900"
                       >
                         {QuestionTypes.map((type) => (
                           <option key={type.value} value={type.value}>
@@ -448,7 +520,7 @@ const GenQuestion = () => {
                             q.id,
                           )
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900"
                       />
                     </div>
 
@@ -465,7 +537,7 @@ const GenQuestion = () => {
                             q.id,
                           )
                         }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900"
                       >
                         {ChoiceCountOptions.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -541,7 +613,7 @@ const GenQuestion = () => {
                           <input
                             type="number"
                             min="1"
-                            max="5"
+                            max="100"
                             value={question.points}
                             onChange={(e) =>
                               updateQuestion(

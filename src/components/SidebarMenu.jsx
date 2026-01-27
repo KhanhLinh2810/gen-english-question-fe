@@ -53,7 +53,7 @@ const SidebarMenu = () => {
       path: "/CreateExam",
     },
     {
-      label: "Tạo câu hỏi tự động",
+      label: "Sinh câu hỏi tự động",
       icon: PencilIcon,
       path: "/gen-questions",
     },

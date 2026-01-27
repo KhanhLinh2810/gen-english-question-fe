@@ -362,7 +362,7 @@ const ManualQuestions = () => {
                     <input
                       type="number"
                       min="1"
-                      max="5"
+                      max="100"
                       value={question.points}
                       onChange={(e) =>
                         updateQuestion(
