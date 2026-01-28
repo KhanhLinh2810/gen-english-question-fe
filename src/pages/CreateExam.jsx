@@ -643,7 +643,7 @@ const CreateExam = () => {
                       return (
                         <div
                           key={question.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition max-w-full"
                         >
                           <div className="flex items-start gap-4">
                             {/* checkbox */}
@@ -683,7 +683,7 @@ const CreateExam = () => {
                                 )}
                               </div>
 
-                              <h3 className="text-lg font-medium text-black mb-2 truncate">
+                              <h3 className="text-lg font-medium text-black mb-2 truncate text-wrap">
                                 {question.content}
                               </h3>
 

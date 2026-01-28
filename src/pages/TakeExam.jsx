@@ -198,11 +198,19 @@ const TakeExam = () => {
     setAnswers((prev) => ({ ...prev, [qId]: cId }));
 
     try {
-      await saveAnswer(attemptIdRef.current, [
-        { question_id: qId, choice_id: cId },
-      ]);
-    } catch {
-      // silent fail
+      const currentAnswers = Object.entries({ ...answers, [qId]: cId }).map(
+        ([qId, choiceId]) => ({
+          question_id: parseInt(qId),
+          choice_id: parseInt(choiceId),
+        }),
+      );
+
+      await saveAnswer(attemptIdRef.current, currentAnswers);
+    } catch (error) {
+      if (error.code == "exam_submission_closed")
+        "Bài thi đã được nộp. Không thể chỉnh sửa hoặc nộp lại.";
+      else
+        toast.info("Có lỗi khi lưu câu trả lời. Vui lòng không tải lại trang");
     }
   };
 
