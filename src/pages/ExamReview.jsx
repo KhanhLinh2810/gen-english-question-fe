@@ -170,13 +170,13 @@ const ExamReview = () => {
                     )}
                   </div>
 
-                  {/* Choices */}
                   <div className="space-y-2">
                     {question.choices &&
                       question.choices.map((choice, choiceIndex) => {
                         const choiceLabel = String.fromCharCode(
                           65 + choiceIndex,
                         ); // A, B, C, D
+                        console.log(choice);
                         const isSelected = choice.is_selected;
                         const isCorrectChoice = choice.is_correct;
 
@@ -204,17 +204,37 @@ const ExamReview = () => {
                                 {choiceLabel}.
                               </span>
                               <span>{choice.content}</span>
+
                               {isCorrectChoice && (
                                 <span className="ml-auto text-green-600 font-semibold text-sm">
                                   ✓ Đáp án đúng
                                 </span>
                               )}
+
                               {isSelected && !isCorrectChoice && (
                                 <span className="ml-auto text-red-600 font-semibold text-sm">
                                   ✗ Bạn đã chọn
                                 </span>
                               )}
                             </div>
+
+                            {choice.explanation && (
+                              <div className="mt-4 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 p-4">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-yellow-600 text-lg">
+                                    💡
+                                  </span>
+                                  <div>
+                                    <p className="font-semibold text-yellow-800 mb-1">
+                                      Giải thích
+                                    </p>
+                                    <p className="text-yellow-900 text-sm leading-relaxed">
+                                      {choice.explanation}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}

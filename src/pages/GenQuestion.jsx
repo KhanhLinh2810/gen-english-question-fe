@@ -225,7 +225,7 @@ const GenQuestion = () => {
         description: q.description || "",
         score: q.points,
         type: q.type,
-        tags: q.tags || "",
+        tags: q.tags.toString() || "",
         by_ai: false,
         choices: q.choices.map((choice) => ({
           content: choice.text,
@@ -268,7 +268,7 @@ const GenQuestion = () => {
       description: q.description,
       type: q.type,
       points: q.score,
-      tags: q.tags || "",
+      tags: q.tags.toString() || "",
       choices: q.choices.map((c, cIndex) => ({
         id: cIndex + 1,
         text: c.content,
@@ -348,6 +348,8 @@ const GenQuestion = () => {
 
     try {
       setLoadingAll(true);
+      console.log(transform_data_to_match_backend_API(selectedQuestions));
+
       const response = await createQuestions(
         transform_data_to_match_backend_API(selectedQuestions),
       );
@@ -358,6 +360,7 @@ const GenQuestion = () => {
         setQuestions([]);
       }
     } catch (error) {
+      console.log(error.response.data);
       console.error("Error saving questions:", error);
       const errorMessage =
         error.response?.data?.message || "Có lỗi xảy ra khi lưu câu hỏi";

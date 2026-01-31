@@ -192,7 +192,7 @@ const ManualQuestions = () => {
         description: q.description || "",
         score: q.points,
         type: q.type,
-        tags: q.tags || "",
+        tags: q.tags.toString() || "",
         by_ai: false,
         choices: q.choices.map((choice) => ({
           content: choice.text,
