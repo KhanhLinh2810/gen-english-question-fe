@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import SidebarMenu from "../components/SidebarMenu";
 import ConfirmModal from "../components/ConfirmModal";
-import { createAutoQuestions, createQuestions } from "../api/questionApi.js";
+import {
+  createAutoQuestions,
+  createQuestions,
+  getGenQuestion,
+} from "../api/questionApi.js";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { ChoiceCountOptions, QuestionTypes } from "../enums/question.js";
 import { hanldeError } from "../utils/error.response.js";
@@ -43,6 +47,50 @@ const GenQuestion = () => {
   });
   const [showExplanations, setShowExplanations] = useState({});
   const [isParagraphQuestion, setIsParagraphQuestion] = useState(false);
+  const intervalRef = useRef(null);
+  const [jobId, setJobId] = useState(null);
+  useEffect(() => {
+    const cleanup = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    if (!jobId) {
+      cleanup();
+      return;
+    }
+
+    let isMounted = true;
+
+    const checkStatus = async () => {
+      if (!isMounted) return;
+
+      try {
+        const response = await getGenQuestion(jobId);
+
+        // Kiểm tra nếu backend đã xử lý xong và có data
+        if (response.code === "SUCCESS" && response.data) {
+          setQuestions(transform_data_to_match_FE(response.data));
+          toast.success("Đã sinh câu hỏi thành công!");
+          cleanup();
+          setJobId(null);
+        }
+      } catch (err) {
+        // Nếu lỗi 404 hoặc lỗi xử lý, ta có thể tiếp tục poll hoặc dừng tùy logic backend
+        console.error("Polling error:", err);
+      }
+    };
+
+    checkStatus();
+    intervalRef.current = setInterval(checkStatus, 10000); // Polling mỗi 3 giây
+
+    return () => {
+      isMounted = false;
+      cleanup();
+    };
+  }, [jobId]);
 
   // Add new question
   const addQuestion = () => {
@@ -268,7 +316,7 @@ const GenQuestion = () => {
       description: q.description,
       type: q.type,
       points: q.score,
-      tags: q.tags.toString() || "",
+      tags: q?.tags ? q.tags.toString() : "",
       choices: q.choices.map((c, cIndex) => ({
         id: cIndex + 1,
         text: c.content,
@@ -326,11 +374,10 @@ const GenQuestion = () => {
 
     try {
       toast.info("Quá trình sinh câu hỏi có thể diễn ra trong vài phút");
-      const listNewQuestion = await createAutoQuestions(
+      const response = await createAutoQuestions(
         transform_data_to_match_backend_API_gen_question(questionInput),
       );
-
-      setQuestions(transform_data_to_match_FE(listNewQuestion.data));
+      setJobId(response.data);
     } catch (error) {
       const msg = hanldeError(
         error.response?.data?.code,
@@ -348,8 +395,6 @@ const GenQuestion = () => {
 
     try {
       setLoadingAll(true);
-      console.log(transform_data_to_match_backend_API(selectedQuestions));
-
       const response = await createQuestions(
         transform_data_to_match_backend_API(selectedQuestions),
       );
@@ -360,7 +405,6 @@ const GenQuestion = () => {
         setQuestions([]);
       }
     } catch (error) {
-      console.log(error.response.data);
       console.error("Error saving questions:", error);
       const errorMessage =
         error.response?.data?.message || "Có lỗi xảy ra khi lưu câu hỏi";

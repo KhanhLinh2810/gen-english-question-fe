@@ -22,6 +22,17 @@ export const getQuestionDetail = async (questionId) => {
   }
 };
 
+// Get question gen
+export const getGenQuestion = async (jobId) => {
+  try {
+    const response = await apiCaller.get(`/user/questions/automatic/${jobId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error getting question detail:", error);
+    throw error;
+  }
+};
+
 // Create manual questions
 export const createQuestions = async (questionsData) => {
   try {
